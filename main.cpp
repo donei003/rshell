@@ -30,12 +30,14 @@ int main() {
         string sarg, scomm;
         pos = 0;
         strSize = str.size();
+        cout << strSize << endl;
         while(pos < strSize) {
             arg = (char*) malloc(256);
             comm = (char*) malloc(256);
             char* arr[3]; 
             string sarg, scomm;
             bool logOR = false, logAND = false;
+            bool success = false;
 
             arrPos = 0;
             hasArg = 0;
@@ -50,20 +52,27 @@ int main() {
                     break;
                 }
             }
+
+            cout << pos << endl;
             while(pos < strSize && str.at(pos) != ' ') {
                 if(str.at(pos) == ';') {
                     term = true;
+                    ++pos;
                     break;
                 }
                 else if(str.at(pos) == '|') {
-                    if(pos+1 < strSize && str.at(pos+1) == '|') {
+                    ++pos;
+                    if(pos < strSize && str.at(pos+1) == '|') {
                         logOR = true;
+                        ++pos;
                         break;
                     }
                 }
                 else if(str.at(pos) == '&') {
-                    if(pos+1 < strSize && str.at(pos+1) == '&') {
+                    ++pos;
+                    if(pos < strSize && str.at(pos+1) == '&') {
                         logAND = true;
+                        ++pos;
                         break;
                     }
                 }
@@ -74,7 +83,18 @@ int main() {
             }
 
             strcpy(comm,scomm.c_str());
-            ++pos; // This is to ommit the whitespace character following the command
+            //++pos; // This is to ommit the whitespace character following the command
+
+            cout << pos << endl;
+            if(pos < strSize && str.at(pos) == ' ' && !(term)) {
+                while(pos < strSize && str.at(pos) == ' ') {
+                    ++pos;
+                }
+                if(pos >= strSize) {
+                    break;
+                }
+            }
+
             arr[arrPos] = comm;
             ++arrPos;
 
@@ -83,6 +103,22 @@ int main() {
                    ++pos;
                    break;
                }
+               else if(str.at(pos) == '|') {
+                    ++pos;
+                    if(pos < strSize && str.at(pos+1) == '|') {
+                        logOR = true;
+                        ++pos;
+                        break;
+                    }
+                }
+                else if(str.at(pos) == '&') {
+                    ++pos;
+                    if(pos < strSize && str.at(pos+1) == '&') {
+                        logAND = true;
+                        ++pos;
+                        break;
+                    }
+                }
                else {
                    sarg += str.at(pos);
                    ++pos;
@@ -95,18 +131,27 @@ int main() {
                 arr[arrPos] = arg;
                 ++arrPos;
             }
+
             arr[arrPos] = NULL;
             
             /*for(int i = 0; i < 1; ++i) {
                 cout << arr[i] << endl;
             }*/
+
             pid = fork();
+
             if(pid == 0) {
-                if(execvp(arr[0], arr) == -1) {
-                    perror("The command could not be executed!");
-                    errno = 0;
-                }       
+                if((!logOR && logAND) || (!success && logOR) || (success && logAND)) {
+                    if(execvp(arr[0], arr) == -1) {
+                        perror("The command could not be executed!");
+                        errno = 0;
+                    }       
+                    else {
+                        success = true;
+                    }
+                }
             }
+
             else {
                 wait(0);
             }
