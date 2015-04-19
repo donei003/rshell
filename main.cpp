@@ -1,6 +1,7 @@
 #include <iostream>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -15,19 +16,32 @@ void lsCom() {
 bool isDependant = 0;
 int main() {
     string str;
+    pid_t pid;
+    bool hasArg = 0, term = 0;
     int strSize = 0;
     int pos, arrPos;
-    char *arr[3];
+
+    char *arg;
+    char *comm;
+    int n = 0;
     while(1) {
         cout << "$ ";
         getline(cin, str);
-        char *arg = (char*) malloc(256);
-        char *comm = (char*) malloc(256);
         string sarg, scomm;
         pos = 0;
-        arrPos = 0;
         strSize = str.size();
         while(pos < strSize) {
+            arg = (char*) malloc(256);
+            comm = (char*) malloc(256);
+            char* arr[3]; 
+            string sarg, scomm;
+            bool logOR = false, logAND = false;
+
+            arrPos = 0;
+            hasArg = 0;
+            term = false;
+            hasArg = false;
+
             if(str.at(pos) == ' ') {
                 while(pos < strSize && str.at(pos) == ' ') {
                     ++pos;
@@ -38,41 +52,65 @@ int main() {
             }
             while(pos < strSize && str.at(pos) != ' ') {
                 if(str.at(pos) == ';') {
-                    execvp(arr[0], arr);
+                    term = true;
                     break;
                 }
-                /*else if(str.at(pos) == '|') {
-                    if(pos+1 < strSize)*/
+                else if(str.at(pos) == '|') {
+                    if(pos+1 < strSize && str.at(pos+1) == '|') {
+                        logOR = true;
+                        break;
+                    }
+                }
+                else if(str.at(pos) == '&') {
+                    if(pos+1 < strSize && str.at(pos+1) == '&') {
+                        logAND = true;
+                        break;
+                    }
+                }
                 else {
                     scomm += str.at(pos);
+                    ++pos;
                 }
-                ++pos;
             }
 
             strcpy(comm,scomm.c_str());
-            cout << *comm << endl; 
             ++pos; // This is to ommit the whitespace character following the command
             arr[arrPos] = comm;
             ++arrPos;
 
-            while(pos < strSize) {
+            while(pos < strSize && !(term) && !(logOR) && !(logAND)) {
                if(str.at(pos) == ';') {
-                  arr[arrPos + 1] = NULL;
-                  execvp(arr[0], arr);
+                   ++pos;
+                   break;
                }
                else {
                    sarg += str.at(pos);
                    ++pos;
+                   hasArg = 1;
                }
             }
-            strcpy(arg, sarg.c_str());
-            arr[arrPos] = arg;
-            arr[arrPos + 1] = NULL;
 
-            if(execvp(arr[0], arr) == -1) {
-                perror("The command could not be executed!");
-                errno = 0;
-            }        
+            if(hasArg) {
+                strcpy(arg, sarg.c_str());
+                arr[arrPos] = arg;
+                ++arrPos;
+            }
+            arr[arrPos] = NULL;
+            
+            /*for(int i = 0; i < 1; ++i) {
+                cout << arr[i] << endl;
+            }*/
+            pid = fork();
+            if(pid == 0) {
+                if(execvp(arr[0], arr) == -1) {
+                    perror("The command could not be executed!");
+                    errno = 0;
+                }       
+            }
+            else {
+                wait(0);
+            }
+
             free(comm);
             free(arg);
         }
