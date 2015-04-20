@@ -111,7 +111,14 @@ int main() {
                if(str.at(pos) == '#') {
                    break;
                }
-               if(str.at(pos) == ';') {
+               else if(str.at(pos) == '-' && str.at(pos+1) == ' ') {
+                   sarg += str.at(pos);
+                   ++pos;
+                   while(str.at(pos) == ' ') {
+                       ++pos;
+                   }
+               }
+               else if(str.at(pos) == ';') {
                    ++pos;
                    break;
                }
