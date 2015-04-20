@@ -108,6 +108,9 @@ int main() {
             arr[arrPos] = comm;
             ++arrPos;
             while(pos < strSize && !(term) && !(logOR) && !(logAND)) {
+               if(str.at(pos) == '#') {
+                   break;
+               }
                if(str.at(pos) == ';') {
                    ++pos;
                    break;
