@@ -58,11 +58,6 @@ int main() {
 
             while(pos < strSize && str.at(pos) != ' ') {
                 if(str.at(pos) == '#') {
-                    ++pos;
-                    for(int i = pos; i < strSize; ++i) {
-                        scomm += str.at(pos);
-                        ++pos;
-                    }
                     comment = true;
                     break;
                 }
@@ -95,7 +90,6 @@ int main() {
             }
 
             if(comment) {
-                cout << scomm << endl;
                 break;
             }
 
