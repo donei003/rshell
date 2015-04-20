@@ -30,6 +30,7 @@ int main() {
         string sarg, scomm;
         bool success = false;
         bool lastOR = false, lastAND = false;
+        bool comment = false;
 
         pos = 0;
         strSize = str.size();
@@ -56,6 +57,16 @@ int main() {
             }
 
             while(pos < strSize && str.at(pos) != ' ') {
+                if(str.at(pos) == '#') {
+                      ++pos;
+                      for(int i = pos; i < strSize; ++i) {
+                          scomm += str.at(pos);
+                          ++pos;
+                      }
+                    comment = true;
+                    break;
+                }
+
                 if(str.at(pos) == ';') {
                     term = true;
                     ++pos;
@@ -81,6 +92,10 @@ int main() {
                     scomm += str.at(pos);
                     ++pos;
                 }
+            }
+            if(comment) {
+                cout << scomm << endl;
+                break;
             }
 
 
