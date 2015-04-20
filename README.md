@@ -47,6 +47,8 @@ Neglects whitespace characters in between commands, connectors, and arguments
 
 - ```&``` and ```|``` are not valid connectors and spaces in between valid connectors are not allowed
 
+- In the occurrence of a invalid command followed by the ```||``` the proceeding instruction will not execute
+
 - The ```echo``` command will include every character until a valid connector is reached, a ```#```, or the endline
 
 - Tab is treated as a character

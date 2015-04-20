@@ -10,9 +10,6 @@
 #include <string>
 using namespace std;
 
-void lsCom() {
-
-}
 bool isDependant = 0;
 int main() {
     string str;
@@ -35,7 +32,7 @@ int main() {
         pos = 0;
         strSize = str.size();
         //cout << strSize << endl;
-        while(pos < strSize) {
+        while(pos < strSize) { // Kepp looking until the end of line is reached
             arg = (char*) malloc(256);
             comm = (char*) malloc(256);
             char* arr[30]; 
@@ -48,22 +45,22 @@ int main() {
             term = false;
             hasArg = false;
 
-            if(str.at(pos) == ' ') {
+            if(str.at(pos) == ' ') { // If there is a white space before command skip
                 while(pos < strSize && str.at(pos) == ' ') {
                     ++pos;
                 }
-                if(pos >= strSize) {
+                if(pos >= strSize) { // Break out if end is reached
                     break;
                 }
             }
 
-            while(pos < strSize && str.at(pos) != ' ') {
-                if(str.at(pos) == '#') {
+            while(pos < strSize && str.at(pos) != ' ') { // Getting our command into a string
+                if(str.at(pos) == '#') { // So we don't skip our comment
                     comment = true;
                     break;
                 }
 
-                else if(str.at(pos) == ';') {
+                else if(str.at(pos) == ';') { // Looking for connectors adjacent to the command
                     term = true;
                     ++pos;
                     break;
@@ -85,19 +82,19 @@ int main() {
                     }
                 }
                 else {
-                    scomm += str.at(pos);
+                    scomm += str.at(pos); //Pushing onto the string
                     ++pos;
                 }
             }
 
-            if(comment) {
+            if(comment) { // Disregard everything following the '#' character
                 break;
             }
 
-            strcpy(comm,scomm.c_str());
+            strcpy(comm,scomm.c_str()); // Copies the string into a char pointer
             //++pos; // This is to ommit the whitespace character following the command
 
-            if(pos < strSize && str.at(pos) == ' ' && !(term)) {
+            if(pos < strSize && str.at(pos) == ' ' && !(term)) { // Skips whitespace
                 while(pos < strSize && str.at(pos) == ' ') {
                     ++pos;
                 }
@@ -108,8 +105,8 @@ int main() {
 
             arr[arrPos] = comm;
             ++arrPos;
-            while(pos < strSize && !(term) && !(logOR) && !(logAND)) {
-               if(str.at(pos) == '#') {
+            while(pos < strSize && !(term) && !(logOR) && !(logAND)) { // Looking for our arguments
+               if(str.at(pos) == '#') { // This is the same process as for the command
                    break;
                }
                else if(str.at(pos) == '-' && str.at(pos+1) == ' ') {
@@ -149,7 +146,7 @@ int main() {
             if(hasArg) {
                 unsigned int n = 0;
                 string s;
-                while(n < sarg.size()) {
+                while(n < sarg.size()) { // Seperating each command to be into their own char pointer
                     if(sarg.at(n) == '-' && n != 0) {
                         strcpy(arg, s.c_str());
                         arr[arrPos] = arg;
@@ -160,7 +157,7 @@ int main() {
                     ++n;
                 }
                 n = s.size() -1;
-                while(s.at(n) == ' ') {
+                while(s.at(n) == ' ') { // Omitting whitespace characters in argument
                     s.at(n) = '\0';
                     --n;
                 }
@@ -178,22 +175,22 @@ int main() {
             
             int x = 0;
             if(scomm != "exit") {
-                pid = fork();
+                pid = fork(); // Creating child process
 
                 //int x = 0;
-                if(pid == 0) {
+                if(pid == 0) { // Child process
                     if((!(lastOR) && !(lastAND)) || (lastSuccess == true && lastOR == true) || 
                         (lastSuccess == true && lastAND == true)) {
-                        x = execvp(arr[0], arr);
+                        x = execvp(arr[0], arr); // Command execution
                         perror("The command could not be executed!");
                         errno = 0;
                         _exit(0);
                     }
                 }
 
-                else {
+                else { // Parent process
                     wait(0);
-                    if(x == 0) {
+                    if(x == 0) { // Handling the cases of connectors with commands failing/succeeding
                         if(logOR == true) {
                             success = true;
                         }
@@ -216,7 +213,7 @@ int main() {
                 }
             }
 
-            else {
+            else { // If the user typed in "exit"
                 if((!lastOR && !lastAND) || (!lastSuccess && lastOR) || (lastSuccess && lastAND)) {
                     cout << "Good-bye!" << endl;
                     exit(0);
@@ -233,7 +230,7 @@ int main() {
                 lastSuccess = true;
             }
 
-            free(comm);
+            free(comm); // Freeing up our char pointers for the next instruction
             free(arg);
         }
         if(bexit) {
