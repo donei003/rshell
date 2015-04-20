@@ -175,24 +175,39 @@ int main() {
                 cout << arr[i] << endl;
             }*/
 
+            
+            int x = 0;
             if(scomm != "exit") {
                 pid = fork();
 
-
+                //int x = 0;
                 if(pid == 0) {
-                    if((!(lastOR) && !(lastAND)) || (lastSuccess == false && lastOR == true) || 
+                    if((!(lastOR) && !(lastAND)) || (lastSuccess == true && lastOR == true) || 
                         (lastSuccess == true && lastAND == true)) {
-                        if(execvp(arr[0], arr) == -1) {
-                            success = true;
-                            perror("The command could not be executed!");
-                            errno = 0;
-                        }       
+                        x = execvp(arr[0], arr);
+                        perror("The command could not be executed!");
+                        errno = 0;
                         _exit(0);
                     }
                 }
 
                 else {
                     wait(0);
+                    if(x == 0) {
+                        if(logOR == true) {
+                            success = true;
+                        }
+                        else {
+                            success = false;
+                        }
+                    }
+                    else {
+                        success = true;
+                    }
+                    /*else if (x == 0 && logOR) {
+                        cout << x << endl;
+                        success = true;
+                    }*/
                 }
             }
 
@@ -204,10 +219,14 @@ int main() {
             }
 
 
-            
             lastOR = logOR;
             lastAND = logAND;
-            lastSuccess = !(success);
+            if(success == true) {
+                lastSuccess = false;
+            }
+            else {
+                lastSuccess = true;
+            }
 
             free(comm);
             free(arg);
