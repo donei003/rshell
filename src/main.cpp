@@ -30,6 +30,7 @@ int main() {
         string sarg, scomm;
         bool success = false;
         bool lastOR = false, lastAND = false;
+        bool comment = false;
 
         pos = 0;
         strSize = str.size();
@@ -92,6 +93,10 @@ int main() {
                     scomm += str.at(pos);
                     ++pos;
                 }
+            }
+            if(comment) {
+                cout << scomm << endl;
+                break;
             }
 
             if(comment) {
