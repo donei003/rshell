@@ -20,6 +20,7 @@ int main() {
     bool hasArg = 0, term = 0;
     int strSize = 0;
     int pos, arrPos;
+    bool bexit = false;
 
     char *arg;
     char *comm;
@@ -28,17 +29,19 @@ int main() {
         cout << "$ ";
         getline(cin, str);
         string sarg, scomm;
+        bool success = false;
+        bool lastOR = false, lastAND = false;
+
         pos = 0;
         strSize = str.size();
-        cout << strSize << endl;
+        //cout << strSize << endl;
         while(pos < strSize) {
             arg = (char*) malloc(256);
             comm = (char*) malloc(256);
             char* arr[3]; 
             string sarg, scomm;
-            bool logOR = false, logAND = false;
-            bool success = false;
 
+            bool logOR = false, logAND = false;
             arrPos = 0;
             hasArg = 0;
             term = false;
@@ -53,7 +56,6 @@ int main() {
                 }
             }
 
-            cout << pos << endl;
             while(pos < strSize && str.at(pos) != ' ') {
                 if(str.at(pos) == ';') {
                     term = true;
@@ -62,7 +64,7 @@ int main() {
                 }
                 else if(str.at(pos) == '|') {
                     ++pos;
-                    if(pos < strSize && str.at(pos+1) == '|') {
+                    if(pos < strSize && str.at(pos) == '|') {
                         logOR = true;
                         ++pos;
                         break;
@@ -70,7 +72,7 @@ int main() {
                 }
                 else if(str.at(pos) == '&') {
                     ++pos;
-                    if(pos < strSize && str.at(pos+1) == '&') {
+                    if(pos < strSize && str.at(pos) == '&') {
                         logAND = true;
                         ++pos;
                         break;
@@ -82,10 +84,10 @@ int main() {
                 }
             }
 
+
             strcpy(comm,scomm.c_str());
             //++pos; // This is to ommit the whitespace character following the command
 
-            cout << pos << endl;
             if(pos < strSize && str.at(pos) == ' ' && !(term)) {
                 while(pos < strSize && str.at(pos) == ' ') {
                     ++pos;
@@ -97,7 +99,6 @@ int main() {
 
             arr[arrPos] = comm;
             ++arrPos;
-
             while(pos < strSize && !(term) && !(logOR) && !(logAND)) {
                if(str.at(pos) == ';') {
                    ++pos;
@@ -105,7 +106,7 @@ int main() {
                }
                else if(str.at(pos) == '|') {
                     ++pos;
-                    if(pos < strSize && str.at(pos+1) == '|') {
+                    if(pos < strSize && str.at(pos) == '|') {
                         logOR = true;
                         ++pos;
                         break;
@@ -113,7 +114,7 @@ int main() {
                 }
                 else if(str.at(pos) == '&') {
                     ++pos;
-                    if(pos < strSize && str.at(pos+1) == '&') {
+                    if(pos < strSize && str.at(pos) == '&') {
                         logAND = true;
                         ++pos;
                         break;
@@ -122,7 +123,7 @@ int main() {
                else {
                    sarg += str.at(pos);
                    ++pos;
-                   hasArg = 1;
+                   hasArg = true;
                }
             }
 
@@ -138,28 +139,49 @@ int main() {
                 cout << arr[i] << endl;
             }*/
 
-            pid = fork();
+            if(scomm != "exit") {
+                pid = fork();
 
-            if(pid == 0) {
-                if((!logOR && logAND) || (!success && logOR) || (success && logAND)) {
-                    if(execvp(arr[0], arr) == -1) {
-                        perror("The command could not be executed!");
-                        errno = 0;
-                    }       
-                    else {
-                        success = true;
+
+                if(pid == 0) {
+                    if((!lastOR && !lastAND) || (success && lastOR) || (!success && lastAND)) {
+                        if(execvp(arr[0], arr) == -1) {
+                            perror("The command could not be executed!");
+                            errno = 0;
+                            success = false;
+                            _exit(1);
+                        }       
+                        else {
+                            success = true;
+                            _exit(0);
+                        }
                     }
+                }
+
+                else {
+                    wait(0);
                 }
             }
 
             else {
-                wait(0);
+                if((!lastOR && !lastAND) || (!success && lastOR) || (success && lastAND)) {
+                    cout << "Good-bye!" << endl;
+                    exit(0);
+                }
             }
+
+
+
+            lastOR = logOR;
+            lastAND = logAND;
 
             free(comm);
             free(arg);
         }
+        if(bexit) {
+            break;
+        }
     }
 
-return 0;
+    return 0;
 }
