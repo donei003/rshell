@@ -139,6 +139,11 @@ int main() {
                     s += sarg.at(n);
                     ++n;
                 }
+                n = s.size() -1;
+                while(s.at(n) == ' ') {
+                    s.at(n) = '\0';
+                    --n;
+                }
                 strcpy(arg, s.c_str());
                 arr[arrPos] = arg;
                 ++arrPos;
