@@ -179,7 +179,8 @@ int main() {
 
 
                 if(pid == 0) {
-                    if((!(lastOR) && !(lastAND)) || !(success == false && lastOR == true) || (!(success) && lastAND)) {
+                    if((!(lastOR) && !(lastAND)) || (success == false && lastOR == true) || 
+                        (success == true && lastAND == true)) {
                         if(execvp(arr[0], arr) == -1) {
                             perror("The command could not be executed!");
                             errno = 0;
