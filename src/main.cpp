@@ -67,7 +67,7 @@ int main() {
                     break;
                 }
 
-                if(str.at(pos) == ';') {
+                else if(str.at(pos) == ';') {
                     term = true;
                     ++pos;
                     break;
