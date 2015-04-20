@@ -180,9 +180,6 @@ int main() {
 
 
                 if(pid == 0) {
-                    if(lastSuccess == false) {
-                        cout << "1" << endl;
-                    }
                     if((!(lastOR) && !(lastAND)) || (lastSuccess == false && lastOR == true) || 
                         (lastSuccess == true && lastAND == true)) {
                         if(execvp(arr[0], arr) == -1) {
