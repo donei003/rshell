@@ -30,6 +30,7 @@ int main() {
         string sarg, scomm;
         bool success = false;
         bool lastOR = false, lastAND = false;
+        bool lastSuccess = false;
 
         pos = 0;
         strSize = str.size();
@@ -179,18 +180,17 @@ int main() {
 
 
                 if(pid == 0) {
-                    if((!(lastOR) && !(lastAND)) || (success == false && lastOR == true) || 
-                        (success == true && lastAND == true)) {
+                    if(lastSuccess == false) {
+                        cout << "1" << endl;
+                    }
+                    if((!(lastOR) && !(lastAND)) || (lastSuccess == false && lastOR == true) || 
+                        (lastSuccess == true && lastAND == true)) {
                         if(execvp(arr[0], arr) == -1) {
+                            success = true;
                             perror("The command could not be executed!");
                             errno = 0;
-                            success = false;
-                            _exit(1);
                         }       
-                        else {
-                            success = true;
-                            _exit(0);
-                        }
+                        _exit(0);
                     }
                 }
 
@@ -200,16 +200,17 @@ int main() {
             }
 
             else {
-                if((!lastOR && !lastAND) || (!success && lastOR) || (success && lastAND)) {
+                if((!lastOR && !lastAND) || (!lastSuccess && lastOR) || (lastSuccess && lastAND)) {
                     cout << "Good-bye!" << endl;
                     exit(0);
                 }
             }
 
 
-
+            
             lastOR = logOR;
             lastAND = logAND;
+            lastSuccess = !(success);
 
             free(comm);
             free(arg);
