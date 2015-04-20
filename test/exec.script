@@ -1,0 +1,134 @@
+Script started on Mon 20 Apr 2015 04:20:31 AM PDT
+~
+donei003@hammer $ cd shell_temp
+~/shell_temp
+donei003@hammer $ make
+mkdir bin
+g++ -Wall -Werror -ansi -pedantic src/main.cpp -o bin/rshell
+~/shell_temp
+donei003@hammer $ bin/rshell
+$ #We are now in      in our shell
+$ #Testing comments
+$ #
+$ ## 
+$ ##    ####    ##
+$ #Testig ng c single command
+$ ls
+bin  LICENSE  makefile	README	src  test
+$ pwd
+/home/csmajs/donei003/shell_temp
+$ ps
+  PID TTY          TIME CMD
+34085 pts/0    00:00:00 bash
+34093 pts/0    00:00:00 rshell
+34107 pts/0    00:00:00 ps
+$ clear
+[H[2J$ #Testing single commands with p spaces and comments
+$           pwd    #hi
+/home/csmajs/donei003/shell_temp
+$                     ls          #####exit
+bin  LICENSE  makefile	README	src  test
+$                                ps
+  PID TTY          TIME CMD
+34085 pts/0    00:00:00 bash
+34093 pts/0    00:00:00 rshell
+34120 pts/0    00:00:00 ps
+$ ls #hello
+bin  LICENSE  makefile	README	src  test
+$ clear
+[H[2J$ #Testing single commands wit  h flags/arguments
+$ ls -a
+.  ..  bin  .git  LICENSE  makefile  README  src  test
+$ ls -la
+total 44
+drwx------  6 donei003 csmajs  4096 Apr 20 04:14 .
+drwx------ 54 donei003 csmajs 16384 Apr 20 04:13 ..
+drwx------  2 donei003 csmajs  4096 Apr 20 04:14 bin
+drwx------  8 donei003 csmajs  4096 Apr 20 04:14 .git
+-rw-------  1 donei003 csmajs  1063 Apr 19 23:39 LICENSE
+-rw-------  1 donei003 csmajs   118 Apr 19 23:41 makefile
+-rw-------  1 donei003 csmajs    29 Apr 11 16:27 README
+drwx------  2 donei003 csmajs  4096 Apr 20 04:13 src
+drwx------  2 donei003 csmajs  4096 Apr 20 04:14 test
+$ ls -R
+.:
+bin  LICENSE  makefile	README	src  test
+
+./bin:
+rshell
+
+./src:
+a.out  main.cpp
+
+./test:
+exec.script
+$ echo hje  ello world
+hello world
+$ echo hello #world
+hello
+$ ls                    -                   a
+.  ..  bin  .git  LICENSE  makefile  README  src  test
+$ ehc  cho perfect,sdfsfsdfsfdfsdf
+perfect,sdfsfsdfsfdfsdf
+$ clear
+[H[2J$ #Testing connectors
+$ ls; pwd           ; ps
+bin  LICENSE  makefile	README	src  test
+/home/csmajs/donei003/shell_temp
+  PID TTY          TIME CMD
+34085 pts/0    00:00:00 bash
+34093 pts/0    00:00:00 rshell
+34204 pts/0    00:00:00 ps
+$ ls || ps
+bin  LICENSE  makefile	README	src  test
+$ pwd    || ps
+/home/csmajs/donei003/shell_temp
+$ ls -a &&        pwd
+.  ..  bin  .git  LICENSE  makefile  README  src  test
+/home/csmajs/donei003/shell_temp
+$ echo hello world   ; ls      &&     ls   -   l || pwd
+hello world
+bin  LICENSE  makefile	README	src  test
+total 20
+drwx------ 2 donei003 csmajs 4096 Apr 20 04:14 bin
+-rw------- 1 donei003 csmajs 1063 Apr 19 23:39 LICENSE
+-rw------- 1 donei003 csmajs  118 Apr 19 23:41 makefile
+-rw------- 1 donei003 csmajs   29 Apr 11 16:27 README
+drwx------ 2 donei003 csmajs 4096 Apr 20 04:13 src
+drwx------ 2 donei003 csmajs 4096 Apr 20 04:14 test
+$ pwd |;&
+/home/csmajs/donei003/shell_temp
+The command could not be executed!: No such file or directory
+$ fail    ;
+The command could not be executed!: No such file or directory
+$ pwd   |     |   ls
+pwd: ignoring non-option arguments
+/home/csmajs/donei003/shell_temp
+$ clear
+[H[2J$ #Multiple rshells running
+$ ps
+  PID TTY          TIME CMD
+34085 pts/0    00:00:00 bash
+34093 pts/0    00:00:00 rshell
+34337 pts/0    00:00:00 ps
+$ bin/rshell
+$ #Were are now in another shell
+$ ps
+  PID TTY          TIME CMD
+34085 pts/0    00:00:00 bash
+34093 pts/0    00:00:00 rshell
+34233 pts/0    00:00:00 rshell
+34347 pts/0    00:00:00 ps
+$ echo we are done
+we are done
+$ #exit inner r shell
+$ exit
+Good-bye!
+$ #exit shell
+$ exit
+Good-bye!
+~/shell_temp
+donei003@hammer $ exit
+exit
+
+Script done on Mon 20 Apr 2015 04:35:31 AM PDT
