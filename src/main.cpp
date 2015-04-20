@@ -41,6 +41,7 @@ int main() {
             string sarg, scomm;
 
             bool logOR = false, logAND = false;
+            bool comment = false;
             arrPos = 0;
             hasArg = 0;
             term = false;
@@ -56,7 +57,17 @@ int main() {
             }
 
             while(pos < strSize && str.at(pos) != ' ') {
-                if(str.at(pos) == ';') {
+                if(str.at(pos) == '#') {
+                    ++pos;
+                    for(int i = pos; i < strSize; ++i) {
+                        scomm += str.at(pos);
+                        ++pos;
+                    }
+                    comment = true;
+                    break;
+                }
+
+                else if(str.at(pos) == ';') {
                     term = true;
                     ++pos;
                     break;
@@ -83,6 +94,10 @@ int main() {
                 }
             }
 
+            if(comment) {
+                cout << scomm << endl;
+                break;
+            }
 
             strcpy(comm,scomm.c_str());
             //++pos; // This is to ommit the whitespace character following the command
