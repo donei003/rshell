@@ -202,7 +202,12 @@ int main() {
                         }
                     }
                     else {
-                        success = true;
+                        if(logOR) {
+                            success = false;
+                        }
+                        else {
+                            success = true;
+                        }
                     }
                     /*else if (x == 0 && logOR) {
                         cout << x << endl;
