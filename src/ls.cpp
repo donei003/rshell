@@ -4,8 +4,10 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <vector>
 #include <errno.h>
 #include <string.h>
+#include <list>
 using namespace std;
 
 bool noArg = false, flagA = false, flagL = false, flagR = false;
@@ -39,6 +41,8 @@ void findArg(int argc, char* argv[]) {
 
 
 int main(int argc, char* argv[]) {
+    string s;
+    list<string> vs;
     int size = PATH_MAX;
     char* buf;
     struct dirent *cDirent;
@@ -50,6 +54,7 @@ int main(int argc, char* argv[]) {
     char* pathname = getcwd(buf, (size_t)size);
     cout << pathname << endl;
     cDir = opendir(pathname);
+    //cerr << "happened here " << endl;
     if(cDir == NULL) {
         perror("It didn't work");
         errno = 0;
@@ -57,9 +62,15 @@ int main(int argc, char* argv[]) {
     }
 
     while((cDirent = readdir(cDir)) != NULL) {
+        s = cDirent->d_name;
+        vs.push_back(s);
         cout << cDirent->d_name << endl;
     }
     closedir(cDir);
+    vs.sort();
+    for(auto i = vs.begin(); i != vs.end(); ++i) {
+        cout << *i << endl;
+    }
 
     /*struct stat s;
     stat("ls.cpp", &s);*/
@@ -74,3 +85,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
