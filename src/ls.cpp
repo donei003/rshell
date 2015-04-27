@@ -40,13 +40,14 @@ void findArg(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
     int size = PATH_MAX;
+    char* buf;
     struct dirent *cDirent;
     DIR *cDir;
     if(argc == 1) {
         noArg = true;
 
     }
-    char* pathname = getcwd(pathname, (size_t)size);
+    char* pathname = getcwd(buf, (size_t)size);
     cout << pathname << endl;
     cDir = opendir(pathname);
     if(cDir == NULL) {
@@ -64,7 +65,7 @@ int main(int argc, char* argv[]) {
     stat("ls.cpp", &s);*/
 
     
-    findArg(argc, argv);
+    //findArg(argc, argv);
 
     if(flagA) {cout << "1" << endl;}
     if(flagL) {cout << "2" << endl;}
