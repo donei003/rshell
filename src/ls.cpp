@@ -11,6 +11,8 @@
 using namespace std;
 
 bool noArg = false, flagA = false, flagL = false, flagR = false;
+list<string> vs;
+
 void findArg(int argc, char* argv[]) {
     if(!(noArg)) {
         int ArrInd = 1, ArrPos = 0;
@@ -39,35 +41,40 @@ void findArg(int argc, char* argv[]) {
     }
 }
 
-
-int main(int argc, char* argv[]) {
-    string s;
-    list<string> vs;
+void getCwdFiles() {
     int size = PATH_MAX;
-    char* buf;
     struct dirent *cDirent;
     DIR *cDir;
+    char* buf = NULL;
+    char* pathname = getcwd(buf, (size_t)size);
+    cout << pathname << endl;
+    cDir = opendir(pathname);
+    if(cDir == NULL) {
+        perror("failed");
+        errno = 0;
+    }
+    
+    else {
+        while((cDirent = readdir(cDir)) != NULL) {
+            string s;
+            s = cDirent->d_name;
+            vs.push_back(s);
+        }
+
+        closedir(cDir);
+        vs.sort();
+    }
+    free(pathname);
+    free(buf);
+    free(cDirent);
+}
+
+int main(int argc, char* argv[]) {
     if(argc == 1) {
         noArg = true;
 
     }
-    char* pathname = getcwd(buf, (size_t)size);
-    cout << pathname << endl;
-    cDir = opendir(pathname);
-    //cerr << "happened here " << endl;
-    if(cDir == NULL) {
-        perror("It didn't work");
-        errno = 0;
-        return 1;
-    }
-
-    while((cDirent = readdir(cDir)) != NULL) {
-        s = cDirent->d_name;
-        vs.push_back(s);
-        cout << cDirent->d_name << endl;
-    }
-    closedir(cDir);
-    vs.sort();
+    getCwdFiles();
     for(auto i = vs.begin(); i != vs.end(); ++i) {
         cout << *i << endl;
     }
