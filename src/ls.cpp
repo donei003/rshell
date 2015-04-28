@@ -70,12 +70,22 @@ void getCwdFiles() {
 }
 
 int main(int argc, char* argv[]) {
+    struct stat s;
     if(argc == 1) {
         noArg = true;
 
     }
+
     getCwdFiles();
     for(auto i = vs.begin(); i != vs.end(); ++i) {
+        stat((*i).c_str(),&s);
+        //(S_IWUSR & s.st_mode) ? "w" : "-";
+        if((S_IWUSR & s.st_mode)) {
+            cout << "-";
+        }
+        else {
+            cout << "-";
+        }
         cout << *i << endl;
     }
 
