@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <string.h>
 #include <list>
+#include <pwd.h>
+#include <grp.h>
 using namespace std;
 
 bool noArg = false, flagA = false, flagL = false, flagR = false;
@@ -93,6 +95,7 @@ void getCwdFiles() {
             }
             if(stat((*i).c_str(),&s) == -1) {
                 perror("stat error");
+                break; // This may need to be changed, not sure if continue or not
             }
 
             if((s.st_mode & S_IFMT) == S_IFDIR) {
@@ -120,6 +123,23 @@ void getCwdFiles() {
             (s.st_mode & S_IROTH) ? (cout << 'r') : (cout << '-');
             (s.st_mode & S_IWOTH) ? (cout << 'w') : (cout << '-');
             (s.st_mode & S_IXOTH) ? (cout << 'x') : (cout << '-');
+            cout << ' ' << s.st_nlink << ' ';
+
+            passwd *usrid = getpwuid(s.st_uid);
+            group *grpid = getgrgid(s.st_gid);
+
+            cout << usrid->pw_name << ' ' << grpid->gr_name << ' ';
+            cout << s.st_size << ' ';
+
+            char date[80];
+            struct tm* timing = localtime(&s.st_mtime);
+            strftime(date,80,"%b",timing);
+            cout << date << ' ';
+            strftime(date,80,"%-d",timing);
+            cout << date << ' ';
+            strftime(date,80,"%R",timing);
+            cout << date << ' ';
+
             cout << "  " << *i << endl;
         }
         cout << endl;
