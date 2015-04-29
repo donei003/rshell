@@ -10,9 +10,23 @@
 #include <list>
 #include <pwd.h>
 #include <grp.h>
+#include <iomanip>
 using namespace std;
 
+struct fileEntry {
+    string perm;
+    int nlink;
+    string user;
+    string group;
+    int size;
+    string month;
+    string day;
+    string time;
+    string name;
+};
+
 bool noArg = false, flagA = false, flagL = false, flagR = false;
+
 list<string> vs;
 
 void findArg(int argc, char* argv[]) {
@@ -89,7 +103,10 @@ void getCwdFiles() {
     }
     else if(flagL) {
         struct stat s;
+        list <fileEntry> lf;
+        int largestSize = 0, largestLink = 0;
         for(auto i = vs.begin(); i != vs.end(); ++i) {
+            struct fileEntry f;
             if((*i).at(0) == '.' && !(flagA)) {
                 continue;
             }
@@ -99,50 +116,85 @@ void getCwdFiles() {
             }
 
             if((s.st_mode & S_IFMT) == S_IFDIR) {
-                cout << 'd';
+                //cout << 'd';
+                f.perm += 'd';
             }
             else if((s.st_mode & S_IFMT) == S_IFREG) {
-                cout << '-';
+                //cout << '-';
+                f.perm += '-';
             }
             else if((s.st_mode & S_IFMT) == S_IFLNK) {
-                cout << 'l';
+                //cout << 'l';
+                f.perm += 'l';
             }
             else if((s.st_mode & S_IFMT) == S_IFCHR) {
-                cout << 'c';
+                //cout << 'c';
+                f.perm += 'c';
             }
             else if((s.st_mode & S_IFMT) == S_IFBLK) {
-                cout << 'b';
+                //cout << 'b';
+                f.perm += 'b';
             }
 
-            (s.st_mode & S_IRUSR) ? (cout << 'r') : (cout << '-');
-            (s.st_mode & S_IWUSR) ? (cout << 'w') : (cout << '-');
-            (s.st_mode & S_IXUSR) ? (cout << 'x') : (cout << '-');
-            (s.st_mode & S_IRGRP) ? (cout << 'r') : (cout << '-');
-            (s.st_mode & S_IWGRP) ? (cout << 'w') : (cout << '-');
-            (s.st_mode & S_IXGRP) ? (cout << 'x') : (cout << '-');
-            (s.st_mode & S_IROTH) ? (cout << 'r') : (cout << '-');
-            (s.st_mode & S_IWOTH) ? (cout << 'w') : (cout << '-');
-            (s.st_mode & S_IXOTH) ? (cout << 'x') : (cout << '-');
-            cout << ' ' << s.st_nlink << ' ';
+            (s.st_mode & S_IRUSR) ? (f.perm += 'r') : (f.perm += '-');
+            (s.st_mode & S_IWUSR) ? (f.perm += 'w') : (f.perm += '-');
+            (s.st_mode & S_IXUSR) ? (f.perm += 'x') : (f.perm += '-');
+            (s.st_mode & S_IRGRP) ? (f.perm += 'r') : (f.perm += '-');
+            (s.st_mode & S_IWGRP) ? (f.perm += 'w') : (f.perm += '-');
+            (s.st_mode & S_IXGRP) ? (f.perm += 'x') : (f.perm += '-');
+            (s.st_mode & S_IROTH) ? (f.perm += 'r') : (f.perm += '-');
+            (s.st_mode & S_IWOTH) ? (f.perm += 'w') : (f.perm += '-');
+            (s.st_mode & S_IXOTH) ? (f.perm += 'x') : (f.perm += '-');
+            //cout << ' ' << s.st_nlink << ' ';
+            f.nlink = s.st_nlink;
+            
+            unsigned int numDigits = 0;
+            for(int i = s.st_nlink; i > 0; i /= 10) {
+                numDigits++;
+            }
+            if(numDigits > largestLink) {
+                largestLink = numDigits;
+            }
+            numDigits = 0;
+
 
             passwd *usrid = getpwuid(s.st_uid);
             group *grpid = getgrgid(s.st_gid);
-
-            cout << usrid->pw_name << ' ' << grpid->gr_name << ' ';
-            cout << s.st_size << ' ';
+            f.user = usrid->pw_name;
+            f.group = grpid->gr_name;
+            f.size = s.st_size;
+            for(int i = s.st_size; i > 0; i /= 10) {
+                numDigits++;
+            }
+            if(numDigits > largestSize) {
+                largestSize = numDigits;
+            }
+            //cout << usrid->pw_name << ' ' << grpid->gr_name << ' ';
+            //cout << s.st_size << ' ';
 
             char date[80];
             struct tm* timing = localtime(&s.st_mtime);
             strftime(date,80,"%b",timing);
-            cout << date << ' ';
+            //cout << date << ' ';
+            f.month = date;
             strftime(date,80,"%-d",timing);
-            cout << date << ' ';
+            //cout << date << ' ';
+            f.day = date;
             strftime(date,80,"%R",timing);
-            cout << date << ' ';
-
-            cout << "  " << *i << endl;
+            //cout << date << ' ';
+            f.time = date;
+            f.name = *i;
+            //cout << "  " << *i << endl;
+            lf.push_back(f);
         }
-        cout << endl;
+        for(auto i = lf.begin(); i != lf.end(); ++i) {
+            cout << (*i).perm << ' ' << setw(largestLink)
+            << right << (*i).nlink << ' ' << (*i).user
+            << ' ' << (*i).group << ' ' << setw(largestSize)
+            << right << (*i).size << ' ' << (*i).month 
+            << ' ' << (*i).day << ' ' << (*i).time
+            << ' ' << (*i).name << endl;
+        }
     }
 }
 
@@ -156,27 +208,6 @@ int main(int argc, char* argv[]) {
     }
     findArg(argc, argv);
     getCwdFiles();
-    /*for(auto i = vs.begin(); i != vs.end(); ++i) {
-        stat((*i).c_str(),&s);
-        //(S_IWUSR & s.st_mode) ? "w" : "-";
-        if((S_IWUSR & s.st_mode)) {
-            cout << "-";
-        }
-        else {
-            cout << "-";
-        }
-        cout << *i << endl;
-    }*/
-
-    /*struct stat s;
-    stat("ls.cpp", &s);*/
-
-    
-    //findArg(argc, argv);
-
-    if(flagA) {cout << "1" << endl;}
-    if(flagL) {cout << "2" << endl;}
-    if(flagR) {cout << "3" << endl;}
 
 
     return 0;
