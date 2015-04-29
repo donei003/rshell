@@ -63,7 +63,7 @@ void getCwdFiles() {
     DIR *cDir;
     char* buf = NULL;
     char* pathname = getcwd(buf, (size_t)size);
-    cout << pathname << endl;
+    //cout << pathname << endl;
     cDir = opendir(pathname);
     if(cDir == NULL) {
         perror("failed");
@@ -104,7 +104,7 @@ void getCwdFiles() {
     else if(flagL) {
         struct stat s;
         list <fileEntry> lf;
-        int largestSize = 0, largestLink = 0;
+        int largestSize = 0, largestLink = 0, totalSize = 0;
         for(auto i = vs.begin(); i != vs.end(); ++i) {
             struct fileEntry f;
             if((*i).at(0) == '.' && !(flagA)) {
@@ -163,6 +163,7 @@ void getCwdFiles() {
             f.user = usrid->pw_name;
             f.group = grpid->gr_name;
             f.size = s.st_size;
+            totalSize += s.st_size;
             for(int i = s.st_size; i > 0; i /= 10) {
                 numDigits++;
             }
@@ -187,6 +188,7 @@ void getCwdFiles() {
             //cout << "  " << *i << endl;
             lf.push_back(f);
         }
+        cout << "Total " << totalSize << endl;
         for(auto i = lf.begin(); i != lf.end(); ++i) {
             cout << (*i).perm << ' ' << setw(largestLink)
             << right << (*i).nlink << ' ' << (*i).user
