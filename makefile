@@ -6,3 +6,7 @@ rshell:
 			
 clean:
 	rm -rf bin/
+
+cp:
+	mkdir bin -p
+	g++ -Wall -Werror -ansi -pedantic src/cp.cpp -o bin/cp
