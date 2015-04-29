@@ -67,7 +67,66 @@ void getCwdFiles() {
     free(pathname);
     free(buf);
     free(cDirent);
+
+    if(noArg || (flagA && !(flagL) && !(flagR))) {
+        int n = 0;
+        for(auto i = vs.begin(); i != vs.end(); ++i) {
+            if((*i).at(0) == '.' && noArg) {
+                continue;
+            }
+            else if(n == 5) {
+                cout << *i << endl;
+                n = 0;
+            }
+            else {
+                cout << *i << ' ';
+                ++n;
+            }
+        }
+        cout << endl;
+    }
+    else if(flagL) {
+        struct stat s;
+        for(auto i = vs.begin(); i != vs.end(); ++i) {
+            if((*i).at(0) == '.' && !(flagA)) {
+                continue;
+            }
+            if(stat((*i).c_str(),&s) == -1) {
+                perror("stat error");
+            }
+
+            if((s.st_mode & S_IFMT) == S_IFDIR) {
+                cout << 'd';
+            }
+            else if((s.st_mode & S_IFMT) == S_IFREG) {
+                cout << '-';
+            }
+            else if((s.st_mode & S_IFMT) == S_IFLNK) {
+                cout << 'l';
+            }
+            else if((s.st_mode & S_IFMT) == S_IFCHR) {
+                cout << 'c';
+            }
+            else if((s.st_mode & S_IFMT) == S_IFBLK) {
+                cout << 'b';
+            }
+
+            (s.st_mode & S_IRUSR) ? (cout << 'r') : (cout << '-');
+            (s.st_mode & S_IWUSR) ? (cout << 'w') : (cout << '-');
+            (s.st_mode & S_IXUSR) ? (cout << 'x') : (cout << '-');
+            (s.st_mode & S_IRGRP) ? (cout << 'r') : (cout << '-');
+            (s.st_mode & S_IWGRP) ? (cout << 'w') : (cout << '-');
+            (s.st_mode & S_IXGRP) ? (cout << 'x') : (cout << '-');
+            (s.st_mode & S_IROTH) ? (cout << 'r') : (cout << '-');
+            (s.st_mode & S_IWOTH) ? (cout << 'w') : (cout << '-');
+            (s.st_mode & S_IXOTH) ? (cout << 'x') : (cout << '-');
+            cout << "  " << *i << endl;
+        }
+        cout << endl;
+    }
 }
+
+
 
 int main(int argc, char* argv[]) {
     struct stat s;
@@ -75,9 +134,9 @@ int main(int argc, char* argv[]) {
         noArg = true;
 
     }
-
+    findArg(argc, argv);
     getCwdFiles();
-    for(auto i = vs.begin(); i != vs.end(); ++i) {
+    /*for(auto i = vs.begin(); i != vs.end(); ++i) {
         stat((*i).c_str(),&s);
         //(S_IWUSR & s.st_mode) ? "w" : "-";
         if((S_IWUSR & s.st_mode)) {
@@ -87,7 +146,7 @@ int main(int argc, char* argv[]) {
             cout << "-";
         }
         cout << *i << endl;
-    }
+    }*/
 
     /*struct stat s;
     stat("ls.cpp", &s);*/
