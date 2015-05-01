@@ -117,7 +117,7 @@ list <string> getPaths(int argc, char *argv[]) {
    return paths;
 }
 
-void getCwdFiles() {
+/*void getCwdFiles() {
     int size = PATH_MAX;
     struct dirent *cDirent;
     DIR *cDir = NULL;
@@ -265,7 +265,7 @@ void getCwdFiles() {
             << ' ' << (*i).name << endl;
         }
     }
-}
+}*/
 
 void getCwdFilesRec(const char* pathname) {
     string spathname = pathname;
@@ -275,7 +275,7 @@ void getCwdFilesRec(const char* pathname) {
     list <string> FilesInDir;
     list <string> SubDirs;
     list <fileEntry> lf;
-    int largestSize = 0, largestLink = 0, totalSize = 0;
+    int largestSize = 0, largestLink = 0,largestDay = 0, totalSize = 0;
 
     cDir = opendir(spathname.c_str());
     if(cDir == NULL) {
@@ -360,11 +360,23 @@ void getCwdFilesRec(const char* pathname) {
         }
         numDigits = 0;
 
-
+        errno = 0;
         passwd *usrid = getpwuid(s.st_uid);
+        if(usrid == NULL) {
+            perror("Cannot retrieve user information");
+            errno = 0;
+        }
+        else {
+            f.user = usrid->pw_name;
+        }
         group *grpid = getgrgid(s.st_gid);
-        f.user = usrid->pw_name;
-        f.group = grpid->gr_name;
+        if(grpid == NULL) {
+            perror("Cannot retrieve group information");
+            errno = 0;
+        }
+        else {
+            f.group = grpid->gr_name;
+        }
 
 
         f.size = s.st_size;
@@ -376,17 +388,30 @@ void getCwdFilesRec(const char* pathname) {
         if(numDigits > largestSize) {
             largestSize = numDigits;
         }
+        numDigits = 0;
         //cout << usrid->pw_name << ' ' << grpid->gr_name << ' ';
         //cout << s.st_size << ' ';
 
         char date[80];
         struct tm* timing = localtime(&s.st_mtime);
+        
+        if(timing == NULL) {
+            perror("Could not retrieve time information");
+            errno = 0;
+        }
+
         strftime(date,80,"%b",timing);
         //cout << date << ' ';
         f.month = date;
         strftime(date,80,"%-d",timing);
         //cout << date << ' ';
         f.day = date;
+        for(int k = timing->tm_mday; k > 0; k /= 10) {
+            ++numDigits;
+        }
+        if(numDigits > largestDay) {
+            largestDay = numDigits;
+        }
         strftime(date,80,"%R",timing);
         //cout << date << ' ';
         f.time = date;
@@ -408,8 +433,8 @@ void getCwdFilesRec(const char* pathname) {
             << right << (*i).nlink << ' ' << (*i).user
             << ' ' << (*i).group << ' ' << setw(largestSize)
             << right << (*i).size << ' ' << (*i).month 
-            << ' ' << (*i).day << ' ' << (*i).time
-            << ' ' << (*i).name << endl;;
+            << ' ' << setw(largestDay) << right << (*i).day 
+            << ' ' << (*i).time << ' ' << (*i).name << endl;;
         }
         else {
             width += (*i).name.size();
@@ -423,13 +448,15 @@ void getCwdFilesRec(const char* pathname) {
             }
         }
     }
-    cout << endl << endl;
     if(flagR) {
+        //cout << endl;
         SubDirs.sort();
         for(auto i = SubDirs.begin(); i != SubDirs.end(); ++i) {
             if((*i) == "." || (*i) == "..") {
                 continue;
             }
+            cout << endl;
+
             string temp_path = (spathname + "/" + (*i));
             getCwdFilesRec(temp_path.c_str());
         }
@@ -449,12 +476,7 @@ int main(int argc, char* argv[]) {
     IncPaths = getPaths(argc,argv);
     for(auto i = IncPaths.begin(); i != IncPaths.end(); ++i) {
         //cout << *i << endl;
-        /*if(!(flagR)) {
-            getCwdFiles;
-        }
-        else {*/
-            getCwdFilesRec((*i).c_str());
-        //}
+        getCwdFilesRec((*i).c_str());
     }
 
     return 0;
