@@ -156,6 +156,7 @@ void getCwdFilesRec(const char* pathname) {
     }
     
     else {
+        errno = 0;
         while((cDirent = readdir(cDir)) != NULL || errno != 0) {
             if(cDirent == NULL && errno != 0) {
                 perror("An error occurred while reading a file/folder");
