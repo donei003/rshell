@@ -58,7 +58,66 @@ void findArg(int argc, char* argv[]) {
     }
 }
 
-/*void getCwdFiles() {
+list <string> getPaths(int argc, char *argv[]) {
+   list <string> paths;
+   bool hasPath = false; // This means that the user included a path when executing ls
+   
+   for(int i = 1; i < argc; ++i) {
+       if(*(argv[i]) == '-') {
+           continue;
+       }
+       else if(*(argv[i]) == '~') {
+           int size = PATH_MAX;
+           int FWSLeft = 4;
+           char *buf = NULL;
+           string absPath;
+           char *temp_cwd = getcwd(buf, (size_t) size);
+           hasPath = true; // Will likely need to move this 
+           for(int j = 0; *(argv[i] + j) != '\0'; ++j) {
+                if(*(argv[i]+j) == '/') {
+                    --FWSLeft;
+                    if(FWSLeft == 0) {
+                        break;
+                    }
+                    absPath += *(argv[i] + j);
+                }
+                else {
+                    absPath += *(argv[i] + j);
+                }
+           }
+           cout << absPath << endl;
+           paths.push_back(absPath);
+           free(buf);
+       }
+       else if(*(argv[i]) == '/') {
+            hasPath = true;
+            string temp_path = argv[i];
+            paths.push_back(temp_path);
+       }
+       else {
+           hasPath = true;
+           int size = PATH_MAX;
+           char *buf = NULL;
+           char *temp_cwd = getcwd(buf, (size_t) size);
+           string relPath = argv[i];
+           string fullPath = temp_cwd;
+           //cout << fullPath << endl;
+           fullPath += ("/" + relPath);
+           cout << fullPath << endl;
+           paths.push_back(fullPath);
+       }
+   }
+   if(!(hasPath)) {
+       int size = PATH_MAX;
+       char *buf = NULL;
+       char *temp_cwd = getcwd(buf, (size_t) size);
+       string cwd = temp_cwd;
+       paths.push_back(cwd);
+   }
+   return paths;
+}
+
+void getCwdFiles() {
     int size = PATH_MAX;
     struct dirent *cDirent;
     DIR *cDir = NULL;
@@ -111,7 +170,7 @@ void findArg(int argc, char* argv[]) {
         list <fileEntry> lf;
         int largestSize = 0, largestLink = 0, totalSize = 0;
         for(auto i = FilesInDir.begin(); i != FilesInDir.end(); ++i) {
-            struct fileEntry f = {0};
+            struct fileEntry f;
             if((*i).at(0) == '.' && !(flagA)) {
                 continue;
             }
@@ -206,7 +265,7 @@ void findArg(int argc, char* argv[]) {
             << ' ' << (*i).name << endl;
         }
     }
-}*/
+}
 
 void getCwdFilesRec(const char* pathname) {
     string spathname = pathname;
@@ -336,22 +395,44 @@ void getCwdFilesRec(const char* pathname) {
         lf.push_back(f);
         //free(f);
     }
-    cout << "Total " << totalSize/2 << endl;
-    for(auto i = lf.begin(); i != lf.end(); ++i) {
-        cout << (*i).perm << ' ' << setw(largestLink)
-        << right << (*i).nlink << ' ' << (*i).user
-        << ' ' << (*i).group << ' ' << setw(largestSize)
-        << right << (*i).size << ' ' << (*i).month 
-        << ' ' << (*i).day << ' ' << (*i).time
-        << ' ' << (*i).name << endl;
+    int width = 0;
+    if(flagR) {
+        cout << spathname << ": " << endl;
     }
-    SubDirs.sort();
-    for(auto i = SubDirs.begin(); i != SubDirs.end(); ++i) {
-        if((*i) == "." || (*i) == "..") {
-            continue;
+    if(flagL) {
+        cout << "Total " << totalSize/2 << endl;
+    }
+    for(auto i = lf.begin(); i != lf.end(); ++i) {
+        if(flagL) {
+            cout << (*i).perm << ' ' << setw(largestLink)
+            << right << (*i).nlink << ' ' << (*i).user
+            << ' ' << (*i).group << ' ' << setw(largestSize)
+            << right << (*i).size << ' ' << (*i).month 
+            << ' ' << (*i).day << ' ' << (*i).time
+            << ' ' << (*i).name << endl;;
         }
-        string temp_path = (spathname + "/" + (*i));
-        getCwdFilesRec(temp_path.c_str());
+        else {
+            width += (*i).name.size();
+            if(width < 80) {
+                cout << (*i).name << "  ";
+                width += 2;
+            }
+            else {
+                cout << endl << (*i).name << "  ";
+                width = (*i).name.size() + 2;
+            }
+        }
+    }
+    cout << endl << endl;
+    if(flagR) {
+        SubDirs.sort();
+        for(auto i = SubDirs.begin(); i != SubDirs.end(); ++i) {
+            if((*i) == "." || (*i) == "..") {
+                continue;
+            }
+            string temp_path = (spathname + "/" + (*i));
+            getCwdFilesRec(temp_path.c_str());
+        }
     }
     return;
 
@@ -359,14 +440,22 @@ void getCwdFilesRec(const char* pathname) {
 
 int main(int argc, char* argv[]) {
     struct stat s;
+    list <string> IncPaths;
     if(argc == 1) {
         noArg = true;
 
     }
     findArg(argc, argv);
-    //getCwdFiles();
-    getCwdFilesRec(argv[2]);
-
+    IncPaths = getPaths(argc,argv);
+    for(auto i = IncPaths.begin(); i != IncPaths.end(); ++i) {
+        //cout << *i << endl;
+        /*if(!(flagR)) {
+            getCwdFiles;
+        }
+        else {*/
+            getCwdFilesRec((*i).c_str());
+        //}
+    }
 
     return 0;
 }
