@@ -6,24 +6,25 @@
 #include <stdio.h>
 #include <vector>
 #include <errno.h>
-#include <string.h>
+#include <string>
 #include <list>
 #include <pwd.h>
 #include <grp.h>
 #include <iomanip>
 #include <queue>
+#include <stdlib.h>
 using namespace std;
 
 struct fileEntry {
-    string perm = "";
-    int nlink = 0;
-    string user = "";
-    string group = "";
-    int size = 0;
-    string month = "";
-    string day = "";
-    string time = "";
-    string name = "";
+    string perm;
+    int nlink;
+    string user;
+    string group;
+    int size;
+    string month;
+    string day;
+    string time;
+    string name;
 };
 
 bool noArg = false, flagA = false, flagL = false, flagR = false;
@@ -136,17 +137,17 @@ list <string> getPaths(int argc, char *argv[]) {
 
 
 void getCwdFilesRec(const char* pathname) {
-    string spathname = pathname;
-    if(spathname.at(spathname.size()-1) == '/') {
-        spathname.pop_back();
+    string spathname(pathname);
+    if(spathname.at(spathname.size()-1) == '/' && spathname.size() != 1) {
+        spathname.resize(spathname.size()-1);
     }
     struct dirent *cDirent; 
     DIR *cDir;
-    bool hasSubDir = false;
     list <string> FilesInDir;
     list <string> SubDirs;
     list <fileEntry> lf;
-    int largestSize = 0, largestLink = 0,largestDay = 0, totalSize = 0;
+    unsigned int largestSize = 0, largestLink = 0,largestDay = 0, totalSize = 0;
+    unsigned int largestWordSize = 0, largestUser = 0, largestGroup = 0;
 
     cDir = opendir(spathname.c_str());
     if(cDir == NULL) {
@@ -176,15 +177,9 @@ void getCwdFilesRec(const char* pathname) {
         FilesInDir.sort();
     }
 
-    /*for(auto i = FilesInDir.begin(); i != FilesInDir.end(); ++i) {
-        cout << *i << " ";
-    }
-    cout << endl << spathname << endl;*/
-    //delete(cDirent);
-    //delete(cDir);
-    
+    bool hasSubDir = false;
 
-    for(auto i = FilesInDir.begin(); i != FilesInDir.end(); ++i) {
+    for(std::list<string>::iterator i = FilesInDir.begin(); i != FilesInDir.end(); ++i) {
         struct stat s;
         struct fileEntry f;
         if((*i).at(0) == '.' && !(flagA)) {
@@ -234,7 +229,7 @@ void getCwdFilesRec(const char* pathname) {
         f.nlink = s.st_nlink;
         
         unsigned int numDigits = 0;
-        for(int i = s.st_nlink; i > 0; i /= 10) {
+        for(int j = s.st_nlink; j > 0; j /= 10) {
             numDigits++;
         }
         if(numDigits > largestLink) {
@@ -250,6 +245,9 @@ void getCwdFilesRec(const char* pathname) {
         }
         else {
             f.user = usrid->pw_name;
+            if(f.user.size() > largestUser) {
+                largestUser = f.user.size();
+            }
         }
         group *grpid = getgrgid(s.st_gid);
         if(errno != 0) {
@@ -258,13 +256,16 @@ void getCwdFilesRec(const char* pathname) {
         }
         else {
             f.group = grpid->gr_name;
+            if(f.group.size() > largestGroup) {
+                largestGroup = f.group.size();
+            }
         }
 
 
         f.size = s.st_size;
         totalSize += s.st_blocks;
         //totalSize += s.st_size;
-        for(int i = s.st_size; i > 0; i /= 10) {
+        for(int l = s.st_size; l > 0; l /= 10) {
             numDigits++;
         }
         if(numDigits > largestSize) {
@@ -293,6 +294,9 @@ void getCwdFilesRec(const char* pathname) {
         //cout << date << ' ';
         f.time = date;
         f.name = *i;
+        if((*i).size() > largestWordSize) {
+            largestWordSize = (*i).size();
+        }
         //cout << "  " << *i << endl;
         lf.push_back(f);
         //free(f);
@@ -304,31 +308,31 @@ void getCwdFilesRec(const char* pathname) {
     if(flagL) {
         cout << "Total " << totalSize/2 << endl;
     }
-    for(auto i = lf.begin(); i != lf.end(); ++i) {
+    for(std::list<fileEntry>::iterator i = lf.begin(); i != lf.end(); ++i) {
         if(flagL) {
             cout << (*i).perm << ' ' << setw(largestLink)
-            << right << (*i).nlink << ' ' << (*i).user
-            << ' ' << (*i).group << ' ' << setw(largestSize)
+            << right << (*i).nlink << ' ' << setw(largestUser) << right << (*i).user
+            << ' ' << setw(largestGroup) << right << (*i).group << ' ' << setw(largestSize)
             << right << (*i).size << ' ' << (*i).month 
             << ' ' << setw(largestDay) << right << (*i).day 
             << ' ' << (*i).time << ' ' << (*i).name << endl;;
         }
         else {
-            width += (*i).name.size();
-            if(width < 80) {
-                cout << (*i).name << "  ";
-                width += 2;
+            width += largestWordSize;
+            if(width <= 80) {
+                cout << setw(largestWordSize) << left << (*i).name << " ";
+                width += 1;
             }
             else {
-                cout << endl << (*i).name << "  ";
-                width = (*i).name.size() + 2;
+                cout << endl << setw(largestWordSize) << left << (*i).name;
+                width = largestWordSize + 1;
             }
         }
     }
-    if(flagR) {
+    if(flagR && hasSubDir) {
         //cout << endl;
         SubDirs.sort();
-        for(auto i = SubDirs.begin(); i != SubDirs.end(); ++i) {
+        for(std::list<string>::iterator i = SubDirs.begin(); i != SubDirs.end(); ++i) {
             if((*i) == "." || (*i) == "..") {
                 continue;
             }
@@ -343,7 +347,7 @@ void getCwdFilesRec(const char* pathname) {
             getCwdFilesRec(temp_path.c_str());
         }
     }
-    else if(!(hasPath)) {
+    else if(!(hasPath) || (flagA && !(flagL))) {
         cout << endl;
     }
     return;
@@ -351,7 +355,6 @@ void getCwdFilesRec(const char* pathname) {
 }
 
 int main(int argc, char* argv[]) {
-    struct stat s;
     list <string> IncPaths;
     if(argc == 1) {
         noArg = true;
@@ -359,7 +362,7 @@ int main(int argc, char* argv[]) {
     }
     findArg(argc, argv);
     IncPaths = getPaths(argc,argv);
-    for(auto i = IncPaths.begin(); i != IncPaths.end(); ++i) {
+    for(std::list<string>::iterator i = IncPaths.begin(); i != IncPaths.end(); ++i) {
         //cout << *i << endl;
         getCwdFilesRec((*i).c_str());
     }
