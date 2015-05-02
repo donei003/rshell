@@ -53,13 +53,13 @@ Neglects whitespace characters in between commands, connectors, and arguments
 
 - Tab is treated as a character
 
-#LS
+#ls
 
 Replicating the UNIX command to display the contents of a directory(ies)
 
 ##Download and Install
 ```
-$ git clone  http://github.com/yourusername/rshell.git
+$ git clone  http://github.com/donei003/rshell.git
 $ cd rshell
 $ git checkout hw1
 $ make
@@ -92,4 +92,4 @@ $ bin/ls
   it may not be in the same place. Running the same commands twice could result in one seg fault and one success. This is likely
   due to the memory allocated to each user and exceeding it will cause the seg fault.
 
-
+- When -a is passed in, all hidden files will appear before regular files/folders. The '.' is given higher precedence.
