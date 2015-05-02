@@ -53,3 +53,43 @@ Neglects whitespace characters in between commands, connectors, and arguments
 
 - Tab is treated as a character
 
+#LS
+
+Replicating the UNIX command to display the contents of a directory(ies)
+
+##Download and Install
+```
+$ git clone  http://github.com/yourusername/rshell.git
+$ cd rshell
+$ git checkout hw1
+$ make
+$ bin/ls
+```
+
+##Features
+- Working -a flag to display all files, including hidden ones
+
+- Working -l flag to list file descriptions(last modified, size, permissions, etc...)
+
+- Working -R flag with recursive search, refer to Bugs and Limitations
+
+- Allows multiple paths and flags to be used
+
+- Absolute paths and relatives paths supported, including '~'
+
+- If the user enters an invalid flag, an error message will be output but the program will still run
+
+- The absolute path of the folder being displayed is always displayed to give the user more information
+
+
+##Bugs and Limitations
+
+- When executing ls with certain passed in arguments, an error message will appear saying 
+  the operation cannot be performed. This is a problem with the hammer server and does not affect
+  the program.
+
+- When using the -R flag, the program will occasionally seg fault. The seg fault will not always happen and if it occurs
+  it may not be in the same place. Running the same commands twice could result in one seg fault and one success. This is likely
+  due to the memory allocated to each user and exceeding it will cause the seg fault.
+
+
