@@ -33,11 +33,12 @@ bool hasPath = false; // This means that the user included a path when executing
 
 
 void findArg(int argc, char* argv[]) {
+    bool wrongArg = false;
     if(!(noArg)) {
         int ArrInd = 1, ArrPos = 0;
         while(ArrInd < argc) {
             if(*(argv[ArrInd]) == '-') {
-                ArrPos = 0;
+                ArrPos = 1;
                 while(*(argv[ArrInd] + ArrPos) != '\0') {
                     if(*(argv[ArrInd] + ArrPos) == 'a') {
                         flagA = true;
@@ -48,6 +49,9 @@ void findArg(int argc, char* argv[]) {
                     else if(*(argv[ArrInd] + ArrPos) == 'R') {
                         flagR = true;
                     }
+                    else {
+                        wrongArg = true;
+                    }
                     ++ArrPos;
                 }
                 ++ArrInd;
@@ -56,6 +60,9 @@ void findArg(int argc, char* argv[]) {
             else {
                 ++ArrInd;
             }
+        }
+        if(wrongArg) {
+            cerr << "You entered am incorrect flag, it will be omitted" << endl;
         }
     }
 }
@@ -148,7 +155,6 @@ void getCwdFilesRec(char* pathname) {
     list <fileEntry> lf;
     unsigned int largestSize = 0, largestLink = 0,largestDay = 0, totalSize = 0;
     unsigned int largestWordSize = 0, largestUser = 0, largestGroup = 0;
-
     cDir = opendir(spathname.c_str());
     if(cDir == NULL) {
         perror("Cannot open the directory specified");
@@ -183,41 +189,40 @@ void getCwdFilesRec(char* pathname) {
     bool hasSubDir = false;
 
     for(std::list<string>::iterator i = FilesInDir.begin(); i != FilesInDir.end(); ++i) {
+        //cerr << (*i) << " ";
+
         struct stat s;
         struct fileEntry f;
         if((*i).at(0) == '.' && !(flagA)) {
             continue;
         }
         string absPath = spathname + "/" + (*i);
-
-        if(stat((absPath).c_str(),&s) == -1) {
+        int fd = stat((absPath).c_str(),&s);
+        if(fd == -1) {
             perror("stat error");
             errno = 0;
-            break; // This may need to be changed, not sure if continue or not
+            continue; // This may need to be changed, not sure if continue or not
         }
 
         if((s.st_mode & S_IFMT) == S_IFDIR) {
-            //cout << 'd';
             f.perm = 'd';
             hasSubDir = true;
             SubDirs.push_back(*i);
         }
         else if((s.st_mode & S_IFMT) == S_IFREG) {
-            //cout << '-';
             f.perm = '-';
         }
         else if((s.st_mode & S_IFMT) == S_IFLNK) {
-            //cout << 'l';
             f.perm = 'l';
         }
         else if((s.st_mode & S_IFMT) == S_IFCHR) {
-            //cout << 'c';
             f.perm = 'c';
         }
         else if((s.st_mode & S_IFMT) == S_IFBLK) {
-            //cout << 'b';
             f.perm = 'b';
         }
+
+        //cerr << (*i) << " ";
 
         (s.st_mode & S_IRUSR) ? (f.perm += 'r') : (f.perm += '-');
         (s.st_mode & S_IWUSR) ? (f.perm += 'w') : (f.perm += '-');
@@ -228,7 +233,6 @@ void getCwdFilesRec(char* pathname) {
         (s.st_mode & S_IROTH) ? (f.perm += 'r') : (f.perm += '-');
         (s.st_mode & S_IWOTH) ? (f.perm += 'w') : (f.perm += '-');
         (s.st_mode & S_IXOTH) ? (f.perm += 'x') : (f.perm += '-');
-        //cout << ' ' << s.st_nlink << ' ';
         f.nlink = s.st_nlink;
         
         unsigned int numDigits = 0;
@@ -245,6 +249,7 @@ void getCwdFilesRec(char* pathname) {
         if(errno != 0) {
             perror("Cannot retrieve user information");
             errno = 0;
+            exit(0);
         }
         else {
             f.user = usrid->pw_name;
@@ -252,10 +257,13 @@ void getCwdFilesRec(char* pathname) {
                 largestUser = f.user.size();
             }
         }
+        errno = 0;
         group *grpid = getgrgid(s.st_gid);
+        
         if(errno != 0) {
             perror("Cannot retrieve group information");
             errno = 0;
+            exit(0);
         }
         else {
             f.group = grpid->gr_name;
@@ -264,10 +272,9 @@ void getCwdFilesRec(char* pathname) {
             }
         }
 
-
+        
         f.size = s.st_size;
         totalSize += s.st_blocks;
-        //totalSize += s.st_size;
         for(int l = s.st_size; l > 0; l /= 10) {
             numDigits++;
         }
@@ -275,17 +282,13 @@ void getCwdFilesRec(char* pathname) {
             largestSize = numDigits;
         }
         numDigits = 0;
-        //cout << usrid->pw_name << ' ' << grpid->gr_name << ' ';
-        //cout << s.st_size << ' ';
 
         char date[80];
         struct tm *timing = localtime(&s.st_mtime);
         
         strftime(date,80,"%b",timing);
-        //cout << date << ' ';
         f.month = date;
         strftime(date,80,"%-d",timing);
-        //cout << date << ' ';
         f.day = date;
         for(int k = timing->tm_mday; k > 0; k /= 10) {
             ++numDigits;
@@ -294,16 +297,15 @@ void getCwdFilesRec(char* pathname) {
             largestDay = numDigits;
         }
         strftime(date,80,"%R",timing);
-        //cout << date << ' ';
         f.time = date;
         f.name = *i;
         if((*i).size() > largestWordSize) {
             largestWordSize = (*i).size();
         }
-        //cout << "  " << *i << endl;
         lf.push_back(f);
-        //free(f);
     }
+    cout << endl;
+    //cerr << spathname << endl;
     int width = 0;
     if(flagR) {
         cout << spathname << ": " << endl;
@@ -314,11 +316,11 @@ void getCwdFilesRec(char* pathname) {
     for(std::list<fileEntry>::iterator i = lf.begin(); i != lf.end(); ++i) {
         if(flagL) {
             cout << (*i).perm << ' ' << setw(largestLink)
-            << right << (*i).nlink << ' ' << setw(largestUser) << right << (*i).user
-            << ' ' << setw(largestGroup) << right << (*i).group << ' ' << setw(largestSize)
+            << right << (*i).nlink << ' ' << setw(largestUser) << left << (*i).user
+            << ' ' << setw(largestGroup) << left << (*i).group << ' ' << setw(largestSize)
             << right << (*i).size << ' ' << (*i).month 
             << ' ' << setw(largestDay) << right << (*i).day 
-            << ' ' << (*i).time << ' ' << (*i).name << endl;
+            << ' ' << (*i).time << ' ' << (*i).name << endl << flush;
         }
         else {
             width += largestWordSize;
@@ -350,10 +352,11 @@ void getCwdFilesRec(char* pathname) {
                 temp_path = (spathname + "/" + (*i));
             }
             getCwdFilesRec((char*) (temp_path.c_str()));
+
         }
         //SubDirs.erase(SubDirs.begin(),SubDirs.end());
     }
-    else if(!(hasPath) || (flagA && !(flagL))) {
+    else if(!(hasPath) || (flagA && !(flagL)) || (flagR && !(flagL))) {
         cout << endl;
     }
     //return;
