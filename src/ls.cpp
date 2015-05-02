@@ -136,7 +136,7 @@ list <string> getPaths(int argc, char *argv[]) {
 }
 
 
-void getCwdFilesRec(const char* pathname) {
+void getCwdFilesRec(char* pathname) {
     string spathname(pathname);
     if(spathname.at(spathname.size()-1) == '/' && spathname.size() != 1) {
         spathname.resize(spathname.size()-1);
@@ -172,11 +172,14 @@ void getCwdFilesRec(const char* pathname) {
         if(closedir(cDir) == -1) {
             perror("Could not close directory");
             errno = 0;
+            //free(cDir);
+            //free(cDirent);
             exit(0);
         }
         FilesInDir.sort();
     }
-
+    //free(cDir);
+    //free(cDirent);
     bool hasSubDir = false;
 
     for(std::list<string>::iterator i = FilesInDir.begin(); i != FilesInDir.end(); ++i) {
@@ -195,25 +198,25 @@ void getCwdFilesRec(const char* pathname) {
 
         if((s.st_mode & S_IFMT) == S_IFDIR) {
             //cout << 'd';
-            f.perm += 'd';
+            f.perm = 'd';
             hasSubDir = true;
             SubDirs.push_back(*i);
         }
         else if((s.st_mode & S_IFMT) == S_IFREG) {
             //cout << '-';
-            f.perm += '-';
+            f.perm = '-';
         }
         else if((s.st_mode & S_IFMT) == S_IFLNK) {
             //cout << 'l';
-            f.perm += 'l';
+            f.perm = 'l';
         }
         else if((s.st_mode & S_IFMT) == S_IFCHR) {
             //cout << 'c';
-            f.perm += 'c';
+            f.perm = 'c';
         }
         else if((s.st_mode & S_IFMT) == S_IFBLK) {
             //cout << 'b';
-            f.perm += 'b';
+            f.perm = 'b';
         }
 
         (s.st_mode & S_IRUSR) ? (f.perm += 'r') : (f.perm += '-');
@@ -315,7 +318,7 @@ void getCwdFilesRec(const char* pathname) {
             << ' ' << setw(largestGroup) << right << (*i).group << ' ' << setw(largestSize)
             << right << (*i).size << ' ' << (*i).month 
             << ' ' << setw(largestDay) << right << (*i).day 
-            << ' ' << (*i).time << ' ' << (*i).name << endl;;
+            << ' ' << (*i).time << ' ' << (*i).name << endl;
         }
         else {
             width += largestWordSize;
@@ -329,6 +332,8 @@ void getCwdFilesRec(const char* pathname) {
             }
         }
     }
+    //lf.erase(lf.begin(),lf.end());
+    //FilesInDir.erase(FilesInDir.begin(),FilesInDir.end());
     if(flagR && hasSubDir) {
         //cout << endl;
         SubDirs.sort();
@@ -344,13 +349,14 @@ void getCwdFilesRec(const char* pathname) {
             else {
                 temp_path = (spathname + "/" + (*i));
             }
-            getCwdFilesRec(temp_path.c_str());
+            getCwdFilesRec((char*) (temp_path.c_str()));
         }
+        //SubDirs.erase(SubDirs.begin(),SubDirs.end());
     }
     else if(!(hasPath) || (flagA && !(flagL))) {
         cout << endl;
     }
-    return;
+    //return;
 
 }
 
@@ -364,7 +370,7 @@ int main(int argc, char* argv[]) {
     IncPaths = getPaths(argc,argv);
     for(std::list<string>::iterator i = IncPaths.begin(); i != IncPaths.end(); ++i) {
         //cout << *i << endl;
-        getCwdFilesRec((*i).c_str());
+        getCwdFilesRec((char*) ((*i).c_str()));
     }
 
     return 0;
