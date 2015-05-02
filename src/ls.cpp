@@ -304,10 +304,9 @@ void getCwdFilesRec(char* pathname) {
         }
         lf.push_back(f);
     }
-    cout << endl;
     //cerr << spathname << endl;
     int width = 0;
-    if(flagR) {
+    if(flagR || flagA || flagL) {
         cout << spathname << ": " << endl;
     }
     if(flagL) {
@@ -356,7 +355,7 @@ void getCwdFilesRec(char* pathname) {
         }
         //SubDirs.erase(SubDirs.begin(),SubDirs.end());
     }
-    else if(!(hasPath) || (flagA && !(flagL)) || (flagR && !(flagL))) {
+    else if(!(hasPath) || (flagR && !(flagL))) {
         cout << endl;
     }
     //return;
@@ -373,7 +372,16 @@ int main(int argc, char* argv[]) {
     IncPaths = getPaths(argc,argv);
     for(std::list<string>::iterator i = IncPaths.begin(); i != IncPaths.end(); ++i) {
         //cout << *i << endl;
+        if(i != IncPaths.begin()) {
+            if(flagA && !(flagL) && !(flagR)) {
+                cout << endl;
+            }
+            cout << endl;
+        }
         getCwdFilesRec((char*) ((*i).c_str()));
+    }
+    if(!(flagL)) {
+        cout << endl;
     }
 
     return 0;
