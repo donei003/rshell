@@ -15,7 +15,7 @@
 #include <stdlib.h>
 using namespace std;
 
-struct fileEntry {
+struct fileEntry { // Struct used for -l but also for the other flags
     string perm;
     int nlink;
     string user;
@@ -31,7 +31,10 @@ bool noArg = false, flagA = false, flagL = false, flagR = false;
 bool isDir = false;
 bool hasPath = false; // This means that the user included a path when executing ls
 
-
+/* 
+ * This function finds all flags and omits incorrect ones 
+ * Global boolean variable are set if a proper flag is detected
+ */  
 void findArg(int argc, char* argv[]) {
     bool wrongArg = false;
     if(!(noArg)) {
@@ -66,7 +69,9 @@ void findArg(int argc, char* argv[]) {
         }
     }
 }
-
+// Takes in argv and argc and returns a list of paths to be printed
+// This will only return the absolute paths regardless of input
+// I figured it would be easier for me and the user to has abs paths
 list <string> getPaths(int argc, char *argv[]) {
    list <string> paths;
    
@@ -84,7 +89,7 @@ list <string> getPaths(int argc, char *argv[]) {
                perror("Could not obtain a proper path");
                errno = 0;
            }
-           hasPath = true; // Will likely need to move this 
+           hasPath = true; 
            for(int j = 0; *(argv[i] + j) != '\0'; ++j) {
                 if(*(argv[i]+j) == '/') {
                     --FWSLeft;
@@ -120,7 +125,6 @@ list <string> getPaths(int argc, char *argv[]) {
            string fullPath = temp_cwd;
            //cout << fullPath << endl;
            fullPath += ("/" + relPath);
-           cout << fullPath << endl;
            paths.push_back(fullPath);
            free(buf);
            free(temp_cwd);
@@ -143,16 +147,16 @@ list <string> getPaths(int argc, char *argv[]) {
 }
 
 
-void getCwdFilesRec(char* pathname) {
+void getCwdFilesRec(char* pathname) { // The one size fits all ls function, works for all flags
     string spathname(pathname);
     if(spathname.at(spathname.size()-1) == '/' && spathname.size() != 1) {
         spathname.resize(spathname.size()-1);
     }
     struct dirent *cDirent; 
     DIR *cDir;
-    list <string> FilesInDir;
-    list <string> SubDirs;
-    list <fileEntry> lf;
+    list <string> FilesInDir; // list of file names of current dir
+    list <string> SubDirs; // List of SubDirectories in current dir
+    list <fileEntry> lf; // List of all files and descriptions of current dir
     unsigned int largestSize = 0, largestLink = 0,largestDay = 0, totalSize = 0;
     unsigned int largestWordSize = 0, largestUser = 0, largestGroup = 0;
     cDir = opendir(spathname.c_str());
@@ -178,18 +182,13 @@ void getCwdFilesRec(char* pathname) {
         if(closedir(cDir) == -1) {
             perror("Could not close directory");
             errno = 0;
-            //free(cDir);
-            //free(cDirent);
             exit(0);
         }
         FilesInDir.sort();
     }
-    //free(cDir);
-    //free(cDirent);
     bool hasSubDir = false;
 
     for(std::list<string>::iterator i = FilesInDir.begin(); i != FilesInDir.end(); ++i) {
-        //cerr << (*i) << " ";
 
         struct stat s;
         struct fileEntry f;
@@ -201,7 +200,7 @@ void getCwdFilesRec(char* pathname) {
         if(fd == -1) {
             perror("stat error");
             errno = 0;
-            continue; // This may need to be changed, not sure if continue or not
+            continue; 
         }
 
         if((s.st_mode & S_IFMT) == S_IFDIR) {
@@ -222,8 +221,8 @@ void getCwdFilesRec(char* pathname) {
             f.perm = 'b';
         }
 
-        //cerr << (*i) << " ";
-
+        // Adding the perms of the current entry to a string, which is then printed
+        // out to stdout
         (s.st_mode & S_IRUSR) ? (f.perm += 'r') : (f.perm += '-');
         (s.st_mode & S_IWUSR) ? (f.perm += 'w') : (f.perm += '-');
         (s.st_mode & S_IXUSR) ? (f.perm += 'x') : (f.perm += '-');
@@ -303,14 +302,14 @@ void getCwdFilesRec(char* pathname) {
         }
         lf.push_back(f);
     }
-    //cerr << spathname << endl;
     int width = 0;
-    //if(flagR || flagA || flagL) {
-        cout << spathname << ": " << endl;
-    //}
+    cout << spathname << ": " << endl;
     if(flagL) {
         cout << "Total " << totalSize/2 << endl;
     }
+
+
+    // Prints out the contents of the current directory depending on flags
     for(std::list<fileEntry>::iterator i = lf.begin(); i != lf.end(); ++i) {
         if(flagL) {
             cout << (*i).perm << ' ' << setw(largestLink)
@@ -332,10 +331,12 @@ void getCwdFilesRec(char* pathname) {
             }
         }
     }
-    //lf.erase(lf.begin(),lf.end());
-    //FilesInDir.erase(FilesInDir.begin(),FilesInDir.end());
+
+    /* The following if statement is my implementation of the recursive search algorithm
+     * Every time a directory is found, it is pushed into a list and is then iterated through
+     * in this if statement, following the display of current directory's contents.
+     */
     if(flagR && hasSubDir) {
-        //cout << endl;
         SubDirs.sort();
         for(std::list<string>::iterator i = SubDirs.begin(); i != SubDirs.end(); ++i) {
             if((*i) == "." || (*i) == "..") {
