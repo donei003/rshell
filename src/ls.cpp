@@ -285,7 +285,6 @@ void getCwdFilesRec(char* pathname) {
 
         char date[80];
         struct tm *timing = localtime(&s.st_mtime);
-        
         strftime(date,80,"%b",timing);
         f.month = date;
         strftime(date,80,"%-d",timing);
@@ -306,9 +305,9 @@ void getCwdFilesRec(char* pathname) {
     }
     //cerr << spathname << endl;
     int width = 0;
-    if(flagR || flagA || flagL) {
+    //if(flagR || flagA || flagL) {
         cout << spathname << ": " << endl;
-    }
+    //}
     if(flagL) {
         cout << "Total " << totalSize/2 << endl;
     }
@@ -355,7 +354,7 @@ void getCwdFilesRec(char* pathname) {
         }
         //SubDirs.erase(SubDirs.begin(),SubDirs.end());
     }
-    else if(!(hasPath) || (flagR && !(flagL))) {
+    else if((flagR && !(flagL))) {
         cout << endl;
     }
     //return;
