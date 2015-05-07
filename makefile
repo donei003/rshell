@@ -1,4 +1,4 @@
-all: rshell ls
+all: rshell ls cp mv 
 
 rshell:
 	mkdir bin -p
@@ -13,3 +13,9 @@ cp:
 ls:
 	mkdir bin -p
 	g++ -std=c++11 -Wall -Werror -ansi -pedantic src/ls.cpp -o bin/ls
+mv:
+	mkdir bin -p
+	g++ -std=c++11 -Wall -Werror -ansi -pedantic src/mv.cpp -o bin/mv
+rm:
+	mkdir bin -p
+	g++ -std=c++11 -Wall -Werror -ansi -pedantic src/rm.cpp -o bin/rm
