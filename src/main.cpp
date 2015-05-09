@@ -189,7 +189,12 @@ int main() {
                 }
 
                 else { // Parent process
-                    wait(0);
+                    if(pid == -1) {
+                        perror("fork: ");
+                    }
+                    if(wait(0) == -1) {
+                        perror("wait: ");
+                    }
                     if(x == 0) { // Handling the cases of connectors with commands failing/succeeding
                         if(logOR == true) {
                             success = true;
