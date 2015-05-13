@@ -308,7 +308,6 @@ int main() {
             }*/
 
 
-            int ifd, ofd;
             int x = 0;
             if(scomm != "exit") {
                 pid = fork(); // Creating child process
@@ -319,7 +318,6 @@ int main() {
                         (lastSuccess == true && lastAND == true)) {
                         if(bPipe) {}
                         if(oRedir2) {
-                            ofd = dup(1);         
                             if(close(1) == -1) {
                                 perror("close: ");
                             }
@@ -330,7 +328,6 @@ int main() {
                             }
                         }
                         if(oRedir) {
-                            ofd = dup(1);         
                             if(close(1) == -1) {
                                 perror("close: ");
                             }
@@ -341,7 +338,6 @@ int main() {
                             }
                         }
                         if(iRedir) {
-                            ifd = dup(0);
                             if(close(0) == -1) {
                                 perror("close: ");
                             }
@@ -357,18 +353,12 @@ int main() {
                             perror("The command could not be executed!");
                             //success = false;
                         }
-                        if(oRedir || oRedir2) {
-                            cout << "heelo" << endl;
-                            dup2(ofd, 1);
-                        }
-                        if(iRedir) {
-                            dup2(ifd, 0);
-                        }
                         errno = 0;
                         _exit(0);
                     }
                 }
-
+ // close fd[0] and 1 dup fd[1]
+ // close fd[1] and 0 dup fd[0]
                 else { // Parent process
                     if(pid == -1) {
                         perror("fork: ");
@@ -400,10 +390,10 @@ int main() {
             }
 
             else { // If the user typed in "exit"
-                if((!lastOR && !lastAND) || (!lastSuccess && lastOR) || (lastSuccess && lastAND)) {
+                //if((!lastOR && !lastAND) || (!lastSuccess && lastOR) || (lastSuccess && lastAND)) {
                     cout << "Good-bye!" << endl;
                     exit(0);
-                }
+                //}
             }
 
 
