@@ -235,9 +235,9 @@ int main() {
                     ++pos;
                 }
             }*/
-            vector <string> infiles;
-            vector <string> outfiles;
-            vector <string> outfilesApp;
+            vector <string> infiles; // For the < operator
+            vector <string> outfiles; // For the > operator
+            vector <string> outfilesApp; // For the >> operator
             //cout << pos << endl;
             //cout << strSize << endl;
             while((oRedir || oRedir2 || iRedir) && pos < strSize) { // Will have to add stopping for connectors and such
@@ -306,6 +306,8 @@ int main() {
             for(unsigned int r = 0; r < infiles.size(); ++r) {
                 cout << infiles.at(r) << endl;
             }*/
+
+
             int ifd, ofd;
             int x = 0;
             if(scomm != "exit") {
@@ -353,8 +355,10 @@ int main() {
                         x = execvp(arr[0], arr); // Command execution
                         if(x == -1) {
                             perror("The command could not be executed!");
+                            //success = false;
                         }
                         if(oRedir || oRedir2) {
+                            cout << "heelo" << endl;
                             dup2(ofd, 1);
                         }
                         if(iRedir) {
@@ -411,7 +415,7 @@ int main() {
             else {
                 lastSuccess = true;
             }
-
+            //lastSuccess = success;
             free(comm); // Freeing up our char pointers for the next instruction
             free(arg);
         }
