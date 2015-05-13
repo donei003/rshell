@@ -8,6 +8,9 @@
 #include <stdlib.h>
 #include <cstring>
 #include <string>
+#include <fcntl.h>
+#include <sys/types.h>
+
 using namespace std;
 
 bool isDependant = 0;
@@ -39,6 +42,7 @@ int main() {
             string sarg, scomm;
 
             bool logOR = false, logAND = false;
+            bool bPipe = false, iRedir = false, oRedir = false, oRedir2 = false;
             bool comment = false;
             arrPos = 0;
             hasArg = 0;
@@ -65,11 +69,31 @@ int main() {
                     ++pos;
                     break;
                 }
+                else if(str.at(pos) == '<') {
+                    iRedir = true;
+                    ++pos;
+                    break;
+                }
+                else if(str.at(pos) == '>') {
+                    ++pos;
+                    if(str.at(pos) == '>') {
+                        oRedir2 = true;
+                        ++pos;
+                    }
+                    else {
+                        oRedir = true;
+                    }
+                    break;
+                }
                 else if(str.at(pos) == '|') {
                     ++pos;
                     if(pos < strSize && str.at(pos) == '|') {
                         logOR = true;
                         ++pos;
+                        break;
+                    }
+                    else {
+                        bPipe = true;
                         break;
                     }
                 }
@@ -109,6 +133,10 @@ int main() {
                if(str.at(pos) == '#') { // This is the same process as for the command
                    break;
                }
+               else if(str.at(pos) == ' ' && oRedir) {
+                   ++pos;
+                   continue;
+               }
                else if(str.at(pos) == '-' && str.at(pos+1) == ' ') {
                    sarg += str.at(pos);
                    ++pos;
@@ -116,6 +144,22 @@ int main() {
                        ++pos;
                    }
                }
+               else if(str.at(pos) == '<') {
+                    iRedir = true;
+                    ++pos;
+                    break;
+                }
+                else if(str.at(pos) == '>') {
+                    ++pos;
+                    if(str.at(pos) == '>') {
+                        oRedir2 = true;
+                        ++pos;
+                    }
+                    else {
+                        oRedir = true;
+                    }
+                    break;
+                }
                else if(str.at(pos) == ';') {
                    ++pos;
                    break;
@@ -125,6 +169,10 @@ int main() {
                     if(pos < strSize && str.at(pos) == '|') {
                         logOR = true;
                         ++pos;
+                        break;
+                    }
+                    else {
+                        bPipe = true;
                         break;
                     }
                 }
@@ -141,7 +189,7 @@ int main() {
                    ++pos;
                    hasArg = true;
                }
-            }
+            }// Add a loop to catch the name of the file for io redir
 
             if(hasArg) {
                 unsigned int n = 0;
@@ -165,14 +213,29 @@ int main() {
                 arr[arrPos] = arg;
                 ++arrPos;
             }
-
+            //cout << sarg << endl;
             arr[arrPos] = NULL;
             
             /*for(int i = 0; i < 1; ++i) {
                 cout << arr[i] << endl;
             }*/
 
+            if((oRedir || oRedir2 || iRedir) && pos < strSize && str.at(pos) == ' ' && !(term)) { // Skips whitespace
+                while(pos < strSize && str.at(pos) == ' ') {
+                    ++pos;
+                }
+                if(pos >= strSize) {
+                    break;
+                }
+            }
             
+            string file;
+            while(pos < strSize && str.at(pos) != ' ') { // Will have to add stopping for connectors and such
+                file += str.at(pos);
+                ++pos;
+            }
+
+            int fd;
             int x = 0;
             if(scomm != "exit") {
                 pid = fork(); // Creating child process
@@ -181,8 +244,45 @@ int main() {
                 if(pid == 0) { // Child process
                     if((!(lastOR) && !(lastAND)) || (lastSuccess == true && lastOR == true) || 
                         (lastSuccess == true && lastAND == true)) {
+                        if(bPipe) {}
+                        if(oRedir2) {
+                            fd = dup(1);         
+                            if(close(1) == -1) {
+                                perror("close: ");
+                            }
+                            if(open(file.c_str(), O_CREAT | O_RDWR | O_APPEND, S_IWUSR | S_IRUSR) == -1) {
+                                perror("open: ");
+                            }
+                        }
+                        if(oRedir) {
+                            fd = dup(1);         
+                            if(close(1) == -1) {
+                                perror("close: ");
+                            }
+                            if(open(file.c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IWUSR | S_IRUSR) == -1) {
+                                perror("open: ");
+                            }
+                        }
+                        if(iRedir) {
+                            fd = dup(0);
+                            if(close(0) == -1) {
+                                perror("close: ");
+                            }
+                            if(open(file.c_str(), O_RDONLY) == -1) {
+                                perror("open: ");
+                            }
+                        }
+
                         x = execvp(arr[0], arr); // Command execution
-                        perror("The command could not be executed!");
+                        if(x == -1) {
+                            perror("The command could not be executed!");
+                        }
+                        if(oRedir || oRedir2) {
+                            dup2(fd, 1);
+                        }
+                        if(iRedir) {
+                            dup2(fd, 0);
+                        }
                         errno = 0;
                         _exit(0);
                     }
