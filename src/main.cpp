@@ -10,8 +10,17 @@
 #include <string>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <vector>
+
 
 using namespace std;
+
+int skipWhiteSpace(int pos, int strSize,string str) {
+    while(pos < strSize && str.at(pos) == ' ') {
+        ++pos;
+    }
+    return pos;
+}
 
 bool isDependant = 0;
 int main() {
@@ -71,14 +80,14 @@ int main() {
                 }
                 else if(str.at(pos) == '<') {
                     iRedir = true;
-                    ++pos;
+                    //++pos;
                     break;
                 }
                 else if(str.at(pos) == '>') {
-                    ++pos;
-                    if(str.at(pos) == '>') {
+                    //++pos;
+                    if(pos+1 < strSize && str.at(pos+1) == '>') {
                         oRedir2 = true;
-                        ++pos;
+                        //++pos;
                     }
                     else {
                         oRedir = true;
@@ -110,6 +119,7 @@ int main() {
                     ++pos;
                 }
             }
+            //cout << pos << endl;
 
             if(comment) { // Disregard everything following the '#' character
                 break;
@@ -118,7 +128,7 @@ int main() {
             strcpy(comm,scomm.c_str()); // Copies the string into a char pointer
             //++pos; // This is to ommit the whitespace character following the command
 
-            if(pos < strSize && str.at(pos) == ' ' && !(term)) { // Skips whitespace
+            if(pos < strSize && str.at(pos) == ' ' && !(term) && !(oRedir || oRedir2 || iRedir || bPipe)) { // Skips whitespace
                 while(pos < strSize && str.at(pos) == ' ') {
                     ++pos;
                 }
@@ -146,14 +156,14 @@ int main() {
                }
                else if(str.at(pos) == '<') {
                     iRedir = true;
-                    ++pos;
+                    //++pos;
                     break;
                 }
                 else if(str.at(pos) == '>') {
-                    ++pos;
-                    if(str.at(pos) == '>') {
+                    //++pos;
+                    if(pos+1 < strSize && str.at(pos + 1) == '>') {
                         oRedir2 = true;
-                        ++pos;
+                        //++pos;
                     }
                     else {
                         oRedir = true;
@@ -220,22 +230,83 @@ int main() {
                 cout << arr[i] << endl;
             }*/
 
-            if((oRedir || oRedir2 || iRedir) && pos < strSize && str.at(pos) == ' ' && !(term)) { // Skips whitespace
+            /*if((oRedir || oRedir2 || iRedir) && pos < strSize && str.at(pos) == ' ' && !(term)) { // Skips whitespace
                 while(pos < strSize && str.at(pos) == ' ') {
                     ++pos;
                 }
-                if(pos >= strSize) {
+            }*/
+            vector <string> infiles;
+            vector <string> outfiles;
+            vector <string> outfilesApp;
+            //cout << pos << endl;
+            //cout << strSize << endl;
+            while((oRedir || oRedir2 || iRedir) && pos < strSize) { // Will have to add stopping for connectors and such
+                string file;
+                if(str.at(pos) == ' ') {
+                    ++pos; 
+                    continue;
+                }
+                else if(str.at(pos) == ';') {
+                    ++pos;
                     break;
                 }
-            }
-            
-            string file;
-            while(pos < strSize && str.at(pos) != ' ') { // Will have to add stopping for connectors and such
-                file += str.at(pos);
-                ++pos;
+                else if(str.at(pos) == '>') {
+                    if(pos+1 < strSize && str.at(pos+1) == '>') {
+                        pos += 2;
+                        pos = skipWhiteSpace(pos,strSize,str); 
+                        while(pos < strSize) {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ') {
+                                break;
+                            }
+                            else {
+                                file += str.at(pos);
+                            }
+                            ++pos;
+                        }
+                        oRedir2 = true;
+                        outfilesApp.push_back(file);
+                    }
+                    else {
+                        ++pos;
+                        pos = skipWhiteSpace(pos,strSize,str);
+                        while(pos < strSize) {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ') {
+                                break;
+                            }
+                            else {
+                                file += str.at(pos);
+                            }
+                            ++pos;
+                        }
+                        oRedir = true;
+                        outfiles.push_back(file);
+                    }
+                }
+                else if(str.at(pos) == '<') {
+                    ++pos;
+                    pos = skipWhiteSpace(pos,strSize,str);
+                    while(pos < strSize) {
+                        if(str.at(pos) == ';' || str.at(pos) == ' ') {
+                            break;
+                        }
+                        else {
+                            file += str.at(pos);
+                        }
+                        ++pos;
+                    }
+                    iRedir = true;
+                    infiles.push_back(file);
+                }
+                //cout << pos << endl;
             }
 
-            int fd;
+            /*for(unsigned int e = 0; e < outfiles.size(); ++e) {
+                cout << outfiles.at(e) << endl;
+            }
+            for(unsigned int r = 0; r < infiles.size(); ++r) {
+                cout << infiles.at(r) << endl;
+            }*/
+            int ifd, ofd;
             int x = 0;
             if(scomm != "exit") {
                 pid = fork(); // Creating child process
@@ -246,30 +317,36 @@ int main() {
                         (lastSuccess == true && lastAND == true)) {
                         if(bPipe) {}
                         if(oRedir2) {
-                            fd = dup(1);         
+                            ofd = dup(1);         
                             if(close(1) == -1) {
                                 perror("close: ");
                             }
-                            if(open(file.c_str(), O_CREAT | O_RDWR | O_APPEND, S_IWUSR | S_IRUSR) == -1) {
-                                perror("open: ");
+                            for(unsigned int o = 0; o < outfilesApp.size(); ++o) {
+                                if(open(outfilesApp.at(o).c_str(), O_CREAT | O_RDWR | O_APPEND, S_IWUSR | S_IRUSR) == -1) {
+                                    perror("open: ");
+                                }
                             }
                         }
                         if(oRedir) {
-                            fd = dup(1);         
+                            ofd = dup(1);         
                             if(close(1) == -1) {
                                 perror("close: ");
                             }
-                            if(open(file.c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IWUSR | S_IRUSR) == -1) {
-                                perror("open: ");
+                            for(unsigned int p = 0; p < outfiles.size(); ++p) {
+                                if(open(outfiles.at(p).c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IWUSR | S_IRUSR) == -1) {
+                                    perror("open: ");
+                                }
                             }
                         }
                         if(iRedir) {
-                            fd = dup(0);
+                            ifd = dup(0);
                             if(close(0) == -1) {
                                 perror("close: ");
                             }
-                            if(open(file.c_str(), O_RDONLY) == -1) {
-                                perror("open: ");
+                            for(unsigned int q = 0; q < infiles.size(); ++q) {
+                                if(open(infiles.at(q).c_str(), O_RDONLY) == -1) {
+                                    perror("open: ");
+                                }
                             }
                         }
 
@@ -278,10 +355,10 @@ int main() {
                             perror("The command could not be executed!");
                         }
                         if(oRedir || oRedir2) {
-                            dup2(fd, 1);
+                            dup2(ofd, 1);
                         }
                         if(iRedir) {
-                            dup2(fd, 0);
+                            dup2(ifd, 0);
                         }
                         errno = 0;
                         _exit(0);
