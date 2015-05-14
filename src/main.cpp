@@ -30,6 +30,8 @@ int main() {
     int strSize = 0;
     int pos, arrPos;
     bool bexit = false;
+    int fd[2];
+    int fd1[2];
 
     char *arg;
     char *comm;
@@ -40,6 +42,7 @@ int main() {
         bool success = false;
         bool lastOR = false, lastAND = false;
         bool lastSuccess = false;
+        bool lastPipe = false;
 
         pos = 0;
         strSize = str.size();
@@ -52,7 +55,7 @@ int main() {
 
             bool logOR = false, logAND = false;
             bool bPipe = false, iRedir = false, oRedir = false, oRedir2 = false;
-            bool comment = false;
+            bool comment = false, iRedir3 = false;
             arrPos = 0;
             hasArg = 0;
             term = false;
@@ -79,7 +82,12 @@ int main() {
                     break;
                 }
                 else if(str.at(pos) == '<') {
-                    iRedir = true;
+                    if(pos+2 < strSize && str.at(pos+1) == '<' && str.at(pos+2) == '<') {
+                        iRedir3 = true;
+                    }
+                    else {
+                        iRedir = true;
+                    }
                     //++pos;
                     break;
                 }
@@ -155,7 +163,12 @@ int main() {
                    }
                }
                else if(str.at(pos) == '<') {
-                    iRedir = true;
+                    if(pos+2 < strSize && str.at(pos+1) == '<' && str.at(pos+2) == '<') {
+                        iRedir3 = true;
+                    }
+                    else {
+                        iRedir = true;
+                    }
                     //++pos;
                     break;
                 }
@@ -199,7 +212,7 @@ int main() {
                    ++pos;
                    hasArg = true;
                }
-            }// Add a loop to catch the name of the file for io redir
+            }
 
             if(hasArg) {
                 unsigned int n = 0;
@@ -226,21 +239,13 @@ int main() {
             //cout << sarg << endl;
             arr[arrPos] = NULL;
             
-            /*for(int i = 0; i < 1; ++i) {
-                cout << arr[i] << endl;
-            }*/
-
-            /*if((oRedir || oRedir2 || iRedir) && pos < strSize && str.at(pos) == ' ' && !(term)) { // Skips whitespace
-                while(pos < strSize && str.at(pos) == ' ') {
-                    ++pos;
-                }
-            }*/
             vector <string> infiles; // For the < operator
+            vector <string> infilesS;
             vector <string> outfiles; // For the > operator
             vector <string> outfilesApp; // For the >> operator
             //cout << pos << endl;
             //cout << strSize << endl;
-            while((oRedir || oRedir2 || iRedir) && pos < strSize) { // Will have to add stopping for connectors and such
+            while((oRedir || oRedir2 || iRedir || iRedir3) && pos < strSize) { // Will have to add stopping for connectors and such
                 string file;
                 if(str.at(pos) == ' ') {
                     ++pos; 
@@ -283,19 +288,38 @@ int main() {
                     }
                 }
                 else if(str.at(pos) == '<') {
-                    ++pos;
-                    pos = skipWhiteSpace(pos,strSize,str);
-                    while(pos < strSize) {
-                        if(str.at(pos) == ';' || str.at(pos) == ' ') {
-                            break;
+                    if(pos+2 < strSize && str.at(pos+1) == '<' && str.at(pos+2) == '<') {
+                        pos += 2;
+                        pos = skipWhiteSpace(pos,strSize,str);
+                        if(str.at(pos) == '\"') {
+                            ++pos;
+                            while(pos < strSize) {
+                                if(str.at(pos) == '\"') {
+                                    break;
+                                }
+                                else {
+                                    file += str.at(pos);
+                                }
+                            }
+                            iRedir3 = true;
+                            infilesS.push_back(file);
                         }
-                        else {
-                            file += str.at(pos);
-                        }
-                        ++pos;
                     }
-                    iRedir = true;
-                    infiles.push_back(file);
+                    else {
+                        ++pos;
+                        pos = skipWhiteSpace(pos,strSize,str);
+                        while(pos < strSize) {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ') {
+                                break;
+                            }
+                            else {
+                                file += str.at(pos);
+                            }
+                            ++pos;
+                        }
+                        iRedir = true;
+                        infiles.push_back(file);
+                    }
                 }
                 //cout << pos << endl;
             }
@@ -307,6 +331,9 @@ int main() {
                 cout << infiles.at(r) << endl;
             }*/
 
+            if(bPipe) {
+                pipe(fd);
+            }
 
             int x = 0;
             if(scomm != "exit") {
@@ -316,13 +343,12 @@ int main() {
                 if(pid == 0) { // Child process
                     if((!(lastOR) && !(lastAND)) || (lastSuccess == true && lastOR == true) || 
                         (lastSuccess == true && lastAND == true)) {
-                        if(bPipe) {}
                         if(oRedir2) {
                             if(close(1) == -1) {
                                 perror("close: ");
                             }
                             for(unsigned int o = 0; o < outfilesApp.size(); ++o) {
-                                if(open(outfilesApp.at(o).c_str(), O_CREAT | O_RDWR | O_APPEND, S_IWUSR | S_IRUSR) == -1) {
+                                if(open(outfilesApp.at(outfilesApp.size()-1-o).c_str(), O_CREAT | O_RDWR | O_APPEND, S_IWUSR | S_IRUSR) == -1) {
                                     perror("open: ");
                                 }
                             }
@@ -332,7 +358,7 @@ int main() {
                                 perror("close: ");
                             }
                             for(unsigned int p = 0; p < outfiles.size(); ++p) {
-                                if(open(outfiles.at(p).c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IWUSR | S_IRUSR) == -1) {
+                                if(open(outfiles.at(outfiles.size()-1-p).c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IWUSR | S_IRUSR) == -1) {
                                     perror("open: ");
                                 }
                             }
@@ -342,10 +368,23 @@ int main() {
                                 perror("close: ");
                             }
                             for(unsigned int q = 0; q < infiles.size(); ++q) {
-                                if(open(infiles.at(q).c_str(), O_RDONLY) == -1) {
+                                if(open(infiles.at(infiles.size()-1-q).c_str(), O_RDONLY) == -1) {
                                     perror("open: ");
                                 }
                             }
+                        }
+                        if(iRedir3) {
+                            if(close(0) == -1) {
+                                perror("close: ");
+                            }
+                        }
+                        if(bPipe && !(lastPipe)) {
+                            dup2(fd[1],1);
+                            close(fd[0]);                   
+                        }
+                        else if(lastPipe) {
+                            dup2(fd[0],0);
+                            close(fd[1]);
                         }
 
                         x = execvp(arr[0], arr); // Command execution
@@ -357,14 +396,16 @@ int main() {
                         _exit(0);
                     }
                 }
- // close fd[0] and 1 dup fd[1]
- // close fd[1] and 0 dup fd[0]
+                 // close fd[0] and 1 dup fd[1]
+                 // close fd[1] and 0 dup fd[0]
                 else { // Parent process
                     if(pid == -1) {
                         perror("fork: ");
                     }
-                    if(wait(0) == -1) {
-                        perror("wait: ");
+                    if(!(bPipe)) {
+                        if(wait(0) == -1) {
+                            perror("wait: ");
+                        }
                     }
                     if(x == 0) { // Handling the cases of connectors with commands failing/succeeding
                         if(logOR == true) {
@@ -399,6 +440,7 @@ int main() {
 
             lastOR = logOR;
             lastAND = logAND;
+            lastPipe = bPipe;
             if(success == true) {
                 lastSuccess = false;
             }
