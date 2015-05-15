@@ -42,7 +42,7 @@ int main() {
     int pos, arrPos;
     bool bexit = false;
     int fd[2];
-    //list<int> childPipePIDs;
+    list<int> childPipePIDs;
 
     char *arg;
     char *comm;
@@ -250,15 +250,12 @@ int main() {
                 arr[arrPos] = arg;
                 ++arrPos;
             }
-            //cout << sarg << endl;
             arr[arrPos] = NULL;
             
             vector <string> infiles; // For the < operator
             vector <string> infilesS;
             vector <string> outfiles; // For the > operator
             vector <string> outfilesApp; // For the >> operator
-            //cout << pos << " " << strSize << endl;
-            //cout << strSize << endl;
             while((oRedir || oRedir2 || iRedir || iRedir3) && pos < strSize) {
                 string file;
                 if(str.at(pos) == ' ') {
@@ -350,7 +347,7 @@ int main() {
                 cout << infiles.at(r) << endl;
             }*/
 
-            if(bPipe && lastPipe) {
+            if((bPipe && lastPipe) || (lastPipe && !(bPipe))) {
                 fd0 = fd[0];
                 fd1 = fd[1];
             }
@@ -366,7 +363,6 @@ int main() {
             if(scomm != "exit") {
                 pid = fork(); // Creating child process
 
-                //int x = 0;
                 if(pid == 0) { // Child process
                     if((!(lastOR) && !(lastAND)) || (lastSuccess == true && lastOR == true) || 
                         (lastSuccess == true && lastAND == true)) {
@@ -431,6 +427,15 @@ int main() {
                  // close fd[0] and 1 dup fd[1]
                  // close fd[1] and 0 dup fd[0]
                 else { // Parent process
+                    if(lastPipe) {
+                        close(fd0);
+                        close(fd1);
+                    }
+                    if(lastPipe || bPipe) {
+                        //close(fd0);
+                        //close(fd1);
+                        childPipePIDs.push_back(pid);
+                    }
                     if(pid == -1) {
                         perror("fork: ");
                     }
@@ -438,10 +443,12 @@ int main() {
                         
                         if(lastPipe && !(bPipe)) {
                             cout.flush();
-                            if(wait(0) == -1) {
-                                perror("wait: ");
+                            while(!(childPipePIDs.empty())) {
+                                if(waitpid(childPipePIDs.back(),0,0) == -1) {
+                                    perror("wait: ");
+                                }
+                                childPipePIDs.pop_back();
                             }
-                            //kill(x,SIGKILL);
                         }
                         else {
                             if(wait(0) == -1) {
@@ -465,10 +472,6 @@ int main() {
                             success = true;
                         }
                     }
-                    /*else if (x == 0 && logOR) {
-                        cout << x << endl;
-                        success = true;
-                    }*/
                 }
             }
 
