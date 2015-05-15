@@ -31,27 +31,30 @@ int main() {
     int pos, arrPos;
     bool bexit = false;
     int fd[2];
-    int fd1[2];
+    //int fd1[2];
 
     char *arg;
     char *comm;
     while(1) {
+        cout.flush();
         cout << "$ ";
         getline(cin, str);
+
         string sarg, scomm;
         bool success = false;
         bool lastOR = false, lastAND = false;
         bool lastSuccess = false;
         bool lastPipe = false;
+        int numPipes = 1;
 
         pos = 0;
         strSize = str.size();
-        //cout << strSize << endl;
         while(pos < strSize) { // Kepp looking until the end of line is reached
             arg = (char*) malloc(256);
             comm = (char*) malloc(256);
             char* arr[30]; 
             string sarg, scomm;
+            int fd0, fd1;
 
             bool logOR = false, logAND = false;
             bool bPipe = false, iRedir = false, oRedir = false, oRedir2 = false;
@@ -331,9 +334,17 @@ int main() {
                 cout << infiles.at(r) << endl;
             }*/
 
+            if(bPipe && lastPipe) {
+                fd0 = fd[0];
+                fd1 = fd[1];
+            }
             if(bPipe) {
                 pipe(fd);
             }
+            /*else if(bPipe && lastPipe) {
+            
+                
+            }*/
 
             int x = 0;
             if(scomm != "exit") {
@@ -378,11 +389,15 @@ int main() {
                                 perror("close: ");
                             }
                         }
-                        if(bPipe && !(lastPipe)) {
+                        if(bPipe) { //bPipe && !lastPipe
                             dup2(fd[1],1);
                             close(fd[0]);                   
                         }
-                        else if(lastPipe) {
+                        if(bPipe && lastPipe) {
+                            dup2(fd0,0);
+                            close(fd1);
+                        }
+                        else if(lastPipe && !(bPipe)) { // lastPipe
                             dup2(fd[0],0);
                             close(fd[1]);
                         }
@@ -399,12 +414,24 @@ int main() {
                  // close fd[0] and 1 dup fd[1]
                  // close fd[1] and 0 dup fd[0]
                 else { // Parent process
+                    cout << pos <<  " " << strSize << endl;
+
                     if(pid == -1) {
                         perror("fork: ");
                     }
-                    if(!(bPipe)) {
-                        if(wait(0) == -1) {
-                            perror("wait: ");
+                    if(!(bPipe) || lastPipe) {
+                        
+                        if(lastPipe && !(bPipe)) {
+                            cout.flush();
+                            if(wait(0) == -1) {
+                                perror("wait: ");
+                            }
+                            //kill(x,SIGKILL);
+                        }
+                        else {
+                            if(wait(0) == -1) {
+                                perror("wait: ");
+                            }
                         }
                     }
                     if(x == 0) { // Handling the cases of connectors with commands failing/succeeding
@@ -437,7 +464,10 @@ int main() {
                 //}
             }
 
-
+            //cout << pos <<  " " << strSize << endl;
+            if(bPipe) {
+                ++numPipes;
+            }
             lastOR = logOR;
             lastAND = logAND;
             lastPipe = bPipe;
