@@ -475,6 +475,8 @@ int main() {
             else { // If the user typed in "exit"
                 //if((!lastOR && !lastAND) || (!lastSuccess && lastOR) || (lastSuccess && lastAND)) {
                     cout << "Good-bye!" << endl;
+                    free(comm);
+                    free(arg);
                     exit(0);
                 //}
             }
