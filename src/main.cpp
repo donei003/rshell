@@ -13,6 +13,17 @@
 #include <vector>
 #include <list>
 
+/* 
+ * The loop to find commands : line 88
+ * The loop to find arguments : line 165
+ * The loop to find io redirection files : line 352
+ * The child process for piping, io redirection, and everything else 
+ * execvp related : line 371 
+ */
+
+
+
+
 using namespace std;
 
 int skipWhiteSpace(int pos, int strSize,string str) {
@@ -31,8 +42,7 @@ int main() {
     int pos, arrPos;
     bool bexit = false;
     int fd[2];
-    list<int> childPipePIDs;
-    //int fd1[2];
+    //list<int> childPipePIDs;
 
     char *arg;
     char *comm;
@@ -247,9 +257,9 @@ int main() {
             vector <string> infilesS;
             vector <string> outfiles; // For the > operator
             vector <string> outfilesApp; // For the >> operator
-            cout << pos << " " << strSize << endl;
+            //cout << pos << " " << strSize << endl;
             //cout << strSize << endl;
-            while((oRedir || oRedir2 || iRedir || iRedir3) && pos < strSize) { // Will have to add stopping for connectors and such
+            while((oRedir || oRedir2 || iRedir || iRedir3) && pos < strSize) {
                 string file;
                 if(str.at(pos) == ' ') {
                     ++pos; 
@@ -409,6 +419,7 @@ int main() {
                         }
 
                         x = execvp(arr[0], arr); // Command execution
+
                         if(x == -1) {
                             perror("The command could not be executed!");
                             //success = false;
@@ -420,7 +431,6 @@ int main() {
                  // close fd[0] and 1 dup fd[1]
                  // close fd[1] and 0 dup fd[0]
                 else { // Parent process
-                    cout << x << endl;
                     if(pid == -1) {
                         perror("fork: ");
                     }
