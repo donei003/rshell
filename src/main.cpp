@@ -419,7 +419,7 @@ int main() {
                     if(pid == -1) {
                         perror("fork: ");
                     }
-                    if(!(bPipe) || lastPipe) {
+                    if(!(bPipe)) {
                         
                         if(lastPipe && !(bPipe)) {
                             cout.flush();
