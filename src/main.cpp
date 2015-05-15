@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <vector>
-
+#include <list>
 
 using namespace std;
 
@@ -31,6 +31,7 @@ int main() {
     int pos, arrPos;
     bool bexit = false;
     int fd[2];
+    list<int> childPipePIDs;
     //int fd1[2];
 
     char *arg;
@@ -246,7 +247,7 @@ int main() {
             vector <string> infilesS;
             vector <string> outfiles; // For the > operator
             vector <string> outfilesApp; // For the >> operator
-            //cout << pos << endl;
+            cout << pos << " " << strSize << endl;
             //cout << strSize << endl;
             while((oRedir || oRedir2 || iRedir || iRedir3) && pos < strSize) { // Will have to add stopping for connectors and such
                 string file;
@@ -258,12 +259,17 @@ int main() {
                     ++pos;
                     break;
                 }
+                else if(str.at(pos) == '|') {
+                    bPipe = true;
+                    ++pos;
+                    break;
+                }
                 else if(str.at(pos) == '>') {
                     if(pos+1 < strSize && str.at(pos+1) == '>') {
                         pos += 2;
                         pos = skipWhiteSpace(pos,strSize,str); 
                         while(pos < strSize) {
-                            if(str.at(pos) == ';' || str.at(pos) == ' ') {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|') {
                                 break;
                             }
                             else {
@@ -278,7 +284,7 @@ int main() {
                         ++pos;
                         pos = skipWhiteSpace(pos,strSize,str);
                         while(pos < strSize) {
-                            if(str.at(pos) == ';' || str.at(pos) == ' ') {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|') {
                                 break;
                             }
                             else {
@@ -312,7 +318,7 @@ int main() {
                         ++pos;
                         pos = skipWhiteSpace(pos,strSize,str);
                         while(pos < strSize) {
-                            if(str.at(pos) == ';' || str.at(pos) == ' ') {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|') {
                                 break;
                             }
                             else {
@@ -414,8 +420,7 @@ int main() {
                  // close fd[0] and 1 dup fd[1]
                  // close fd[1] and 0 dup fd[0]
                 else { // Parent process
-                    cout << pos <<  " " << strSize << endl;
-
+                    cout << x << endl;
                     if(pid == -1) {
                         perror("fork: ");
                     }
