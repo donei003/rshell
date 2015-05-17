@@ -41,15 +41,18 @@ Neglects whitespace characters in between commands, connectors, and arguments
 
 - Up arrow key does not run the previous command
 
-- ```echo "hello world"``` will include the quotation marks:w
+- Regular expressions are not supported, ```echo "hello world"``` will include the quotation marks
 
 - Rshell does not accept commands after the first instance of ```#``` in that instruction
 
-- ```&``` and ```|``` are not valid connectors and spaces in between valid connectors are not allowed
+- ```&``` is not valid connector and spaces in between valid connectors are not allowed
 
 - In the occurrence of a invalid command followed by the ```||``` the proceeding instruction will not execute
 
 - The ```echo``` command will include every character until a valid connector is reached, a ```#```, or the endline
+
+- Piping has higher precedence over io redirection, ```ps > foo | cat``` will output to the terminal and nothing is sent to foo,
+  bash gives higher precedence to io redirection. Nothing gets output to terminal but foo gets the output of ```ps```.
 
 - Tab is treated as a character
 
