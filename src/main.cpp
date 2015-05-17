@@ -232,23 +232,28 @@ int main() {
                 unsigned int n = 0;
                 string s;
                 while(n < sarg.size()) { // Seperating each command to be into their own char pointer
-                    if(sarg.at(n) == '-' && n != 0) {
+                    if(sarg.at(n) == ' ' && n != 0) {
                         strcpy(arg, s.c_str());
                         arr[arrPos] = arg;
                         ++arrPos;
                         s = "";
+                        n = skipWhiteSpace(n,sarg.size(),sarg);
+                        continue;
                     }
                     s += sarg.at(n);
                     ++n;
                 }
-                n = s.size() -1;
-                while(s.at(n) == ' ') { // Omitting whitespace characters in argument
-                    s.at(n) = '\0';
-                    --n;
+                if(s.size() > 0) {
+                    n = s.size() -1;
+                    while(s.at(n) == ' ') { // Omitting whitespace characters in argument
+                        s.at(n) = '\0';
+                        --n;
+                    }
+                
+                    strcpy(arg, s.c_str());
+                    arr[arrPos] = arg;
+                    ++arrPos;
                 }
-                strcpy(arg, s.c_str());
-                arr[arrPos] = arg;
-                ++arrPos;
             }
             arr[arrPos] = NULL;
             
@@ -432,8 +437,6 @@ int main() {
                         close(fd1);
                     }
                     if(lastPipe || bPipe) {
-                        //close(fd0);
-                        //close(fd1);
                         childPipePIDs.push_back(pid);
                     }
                     if(pid == -1) {
@@ -502,6 +505,7 @@ int main() {
             free(arg);
         }
         if(bexit) {
+            
             break;
         }
     }

@@ -10,7 +10,7 @@ To install and run rshell, enter the following into a terminal:
 
 2. cd rshell
 
-3. git checkout hw0
+3. git checkout hw2
 
 4. make
 
@@ -21,7 +21,9 @@ To install and run rshell, enter the following into a terminal:
 
 Supports all bash commands and connectors such as ```;```, ```&&```, and ```||```
 
-Supports the chaining of multiple commands using said connectors
+Supports piping and input/output redirection (```|```, ```>```, ```>>```, ```<```)
+
+Supports the chaining of multiple commands using said connectors and piping
 
 Supports the use of comments in the terminal
 
@@ -32,8 +34,6 @@ Neglects whitespace characters in between commands, connectors, and arguments
 ##Bugs and Limitations
 
 - Commands like ```cd``` are not supported currently
-
-- Piping is also not supported currently as well
 
 - Colors for files, directories, etc. are not supported in this make of Rshell
 
