@@ -23,7 +23,7 @@ Supports all bash commands and connectors such as ```;```, ```&&```, and ```||``
 
 Supports piping and input/output redirection (```|```, ```>```, ```>>```, ```<```)
 
-Supports the chaining of multiple commands using said connectors and piping
+Supports the chaining of multiple commands, pipes, and input/output redirections
 
 Supports the use of comments in the terminal
 

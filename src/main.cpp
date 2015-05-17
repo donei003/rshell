@@ -357,7 +357,9 @@ int main() {
                 fd1 = fd[1];
             }
             if(bPipe) {
-                pipe(fd);
+                if(pipe(fd) == -1) {
+                    perror("pipe: ");
+                }
             }
             /*else if(bPipe && lastPipe) {
             
@@ -366,8 +368,9 @@ int main() {
 
             int x = 0;
             if(scomm != "exit") {
-                pid = fork(); // Creating child process
-
+                if((pid = fork()) == -1) {// Creating child process
+                    perror("fork: ");
+                }
                 if(pid == 0) { // Child process
                     if((!(lastOR) && !(lastAND)) || (lastSuccess == true && lastOR == true) || 
                         (lastSuccess == true && lastAND == true)) {
@@ -407,16 +410,28 @@ int main() {
                             }
                         }
                         if(bPipe) { //bPipe && !lastPipe
-                            dup2(fd[1],1);
-                            close(fd[0]);                   
+                            if(dup2(fd[1],1) == -1) {
+                                perror("dup2: ");
+                            }
+                            if(close(fd[0]) == -1) {
+                                perror("close: ");
+                            }
                         }
                         if(bPipe && lastPipe) {
-                            dup2(fd0,0);
-                            close(fd1);
+                            if(dup2(fd0,0) == -1) {
+                                perror("dup2: ");
+                            }
+                            if(close(fd1) == -1) { 
+                                perror("close: ");
+                            }
                         }
                         else if(lastPipe && !(bPipe)) { // lastPipe
-                            dup2(fd[0],0);
-                            close(fd[1]);
+                            if(dup2(fd[0],0) == -1) { 
+                                perror("dup2: ");
+                            }
+                            if(close(fd[1]) == -1) {
+                                perror("close: ");
+                            }
                         }
 
                         x = execvp(arr[0], arr); // Command execution
@@ -433,14 +448,15 @@ int main() {
                  // close fd[1] and 0 dup fd[0]
                 else { // Parent process
                     if(lastPipe) {
-                        close(fd0);
-                        close(fd1);
+                        if(close(fd0) == -1) {
+                            perror("close: ");
+                        }
+                        if(close(fd1) == -1) {
+                            perror("close: ");
+                        }
                     }
                     if(lastPipe || bPipe) {
                         childPipePIDs.push_back(pid);
-                    }
-                    if(pid == -1) {
-                        perror("fork: ");
                     }
                     if(!(bPipe)) {
                         
