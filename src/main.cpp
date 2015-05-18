@@ -402,6 +402,7 @@ int main() {
                             for(unsigned int o = 0; o < outfilesApp.size(); ++o) {
                                 if(open(outfilesApp.at(outfilesApp.size()-1-o).c_str(), O_CREAT | O_RDWR | O_APPEND, S_IWUSR | S_IRUSR) == -1) {
                                     perror("open: ");
+                                    _exit(0);
                                 }
                             }
                         }
@@ -412,6 +413,7 @@ int main() {
                             for(unsigned int p = 0; p < outfiles.size(); ++p) {
                                 if(open(outfiles.at(outfiles.size()-1-p).c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IWUSR | S_IRUSR) == -1) {
                                     perror("open: ");
+                                    _exit(0);
                                 }
                             }
                         }
@@ -422,6 +424,7 @@ int main() {
                             for(unsigned int q = 0; q < infiles.size(); ++q) {
                                 if(open(infiles.at(infiles.size()-1-q).c_str(), O_RDONLY) == -1) {
                                     perror("open: ");
+                                    _exit(0);
                                 }
                             }
                         }
