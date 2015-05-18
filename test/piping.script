@@ -1,4 +1,4 @@
-Script started on Sun 17 May 2015 07:14:31 PM PDT
+Script started on Sun 17 May 2015 11:22:54 PM PDT
 ~
 donei003@hammer $ cs100
 [0;91m
@@ -21,7 +21,7 @@ donei003@hammer $ cs100
 |                                                                             |
 ===============================================================================
 [0m
-[s%%%%%%%%%%[u[0;32mdonei003[0;36m@[0;32mcs100[0;36m:[0;32m~[0;95m [0;36m$[0m cd rshell; make;cler[Kar; bin/rshell
+[s%%%%%%%%%%[u[0;32mdonei003[0;36m@[0;32mcs100[0;36m:[0;32m~[0;95m [0;36m$[0m cd rshell;make;clear;bn/[K[K[Kbin/rshell
 mkdir bin -p
 g++ -std=c++11 -Wall -Werror -ansi -pedantic src/main.cpp -o bin/rshell
 mkdir bin -p
@@ -30,83 +30,42 @@ mkdir bin -p
 g++ -std=c++11 -Wall -Werror -ansi -pedantic src/cp.cpp -o bin/cp
 mkdir bin -p
 g++ -std=c++11 -Wall -Werror -ansi -pedantic src/mv.cpp -o bin/mv
-[H[2J$ #Start with io redirection
-$ ls
+[H[2J$ ls
 bin  f1  f2  f3  LICENSE  makefile  README.md  src  test
-$ ls > f1
-$ cat <f1   f1
-bin
-f1
-f2
-f3
-LICENSE
-makefile
-README.md
-src
-test
-$ ls -al > f1 > f2 > f3 #last file has higher precedence
+$ #Begin with io redirection
+$ ps>  > f1
+$ cat < f1
+  PID TTY          TIME CMD
+21742 pts/42   00:00:00 bash
+21907 pts/42   00:00:00 rshell
+21989 pts/42   00:00:00 ps
+$ cat   cat < f1 > f4
+$ ls
+bin  f1  f2  f3  f4  LICENSE  makefile	README.md  src	test
+$ cat f4
+  PID TTY          TIME CMD
+21742 pts/42   00:00:00 bash
+21907 pts/42   00:00:00 rshell
+21989 pts/42   00:00:00 ps
+$ ls  >f1>f2>f3 #Spacing doesn;t    't affect rs  shell and multiple io
 $ cat f1
 $ cat f2
 $ cat f3
-total 48
-drwx------  6 donei003 csmajs  4096 May 17 19:07 .
-drwx------ 56 donei003 csmajs 16384 May 17 18:58 ..
-drwx------  2 donei003 csmajs  4096 May 17 19:08 bin
--rw-------  1 donei003 csmajs     0 May 17 19:09 f1
--rw-------  1 donei003 csmajs     0 May 17 19:09 f2
--rw-------  1 donei003 csmajs     0 May 17 19:09 f3
-drwx------  8 donei003 csmajs  4096 May 17 19:07 .git
--rw-------  1 donei003 csmajs  1063 May  6 15:46 LICENSE
--rw-------  1 donei003 csmajs   483 May  6 17:04 makefile
--rw-------  1 donei003 csmajs  3301 May 17 18:58 README.md
-drwx------  2 donei003 csmajs  4096 May 17 18:40 src
-drwx------  2 donei003 csmajs  4096 May 17 19:08 test
-$ cat < f3 | c   > f1 # Multipke         Input with O output redirection
-$ cat < f1
-total 48
-drwx------  6 donei003 csmajs  4096 May 17 19:07 .
-drwx------ 56 donei003 csmajs 16384 May 17 18:58 ..
-drwx------  2 donei003 csmajs  4096 May 17 19:08 bin
--rw-------  1 donei003 csmajs     0 May 17 19:09 f1
--rw-------  1 donei003 csmajs     0 May 17 19:09 f2
--rw-------  1 donei003 csmajs     0 May 17 19:09 f3
-drwx------  8 donei003 csmajs  4096 May 17 19:07 .git
--rw-------  1 donei003 csmajs  1063 May  6 15:46 LICENSE
--rw-------  1 donei003 csmajs   483 May  6 17:04 makefile
--rw-------  1 donei003 csmajs  3301 May 17 18:58 README.md
-drwx------  2 donei003 csmajs  4096 May 17 18:40 src
-drwx------  2 donei003 csmajs  4096 May 17 19:08 test
-$ ps>f1>f2>f3 #Spacing doesn't matter
-$ cat < f3
-  PID TTY          TIME CMD
-16464 pts/27   00:00:00 bash
-16543 pts/27   00:00:00 rshell
-16980 pts/27   00:00:00 ps
-$ ps   >    f1    >    f2    >    f3
-$ cat < f3
-  PID TTY          TIME CMD
-16464 pts/27   00:00:00 bash
-16543 pts/27   00:00:00 rshell
-17003 pts/27   00:00:00 ps
-$ #Now, for piping
-$ #Which has higher priot rity than io redirection
-$ ls|cat
 bin
 f1
 f2
 f3
+f4
 LICENSE
 makefile
 README.md
 src
 test
-$ ps         |                  cat      #Spacing l also doesn't matter
-  PID TTY          TIME CMD
-16464 pts/27   00:00:00 bash
-16543 pts/27   00:00:00 rshell
-17169 pts/27   00:00:00 ps
-17170 pts/27   00:00:00 cat
-$ pstree |    |cat|cat|cat|cat #Muli tiple pipes work just fine
+$ cat < f3 > f            ps  tree > f1
+$ cat < f1 > f2 > f3 > f3 4 ^[[D^[[D                               <    f1   < > f2> f3  >  f4 #Same priot rity over output fie = les as bash
+$ cat f2
+$ cat<f3
+$ cat        <           f4
 init-+-auditd---{auditd}
      |-automount---6*[{automount}]
      |-avahi-daemon---avahi-daemon
@@ -125,95 +84,255 @@ init-+-auditd---{auditd}
      |-rpc.statd
      |-rpcbind
      |-rsyslogd---4*[{rsyslogd}]
-     |-sshd-+-2*[sshd---sshd---bash---script---script---bash---rshell]
-     |      |-15*[sshd---sshd---bash---script---script---bash---vim]
-     |      |-3*[sshd---sshd---bash]
-     |      |-14*[sshd---sshd---bash---script---script---bash]
-     |      |-4*[sshd---sshd---sftp-server]
-     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---rshell---rshell
-     |      |-sshd---sshd
-     |      |-sshd---sshd---bash---script---script---bash---a.out
-     |      |-sshd---sshd---bash---script---script---bash---make---gdb-+-make---gdb---rshell
-     |      |                                                          `-rshell
-     |      |-sshd---sshd---bash---script---script---bash---gdb---a.out
-     |      `-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---rshell-+-4*[cat]
-     |                                                                                                               `-pstree
+     |-sshd-+-6*[sshd---sshd---bash---script---script---bash---vim]
+     |      |-12*[sshd---sshd---bash---script---script---bash]
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---rshell
+     |      |-sshd---sshd---bash---script---script---bash---rshell
+     |      |-3*[sshd---sshd---sftp-server]
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---rshell
+     |      |-sshd---sshd---bash---vim
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---script---script---bash
+     |      |-2*[sshd---sshd---bash]
+     |      |-sshd---sshd---bash---a.out
+     |      |-sshd---sshd---bash---script---script---bash---make---g++---cc1plus
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---script---script---bas+
+     |      `-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---rshell---pstree
      |-udevd
      `-ypbind---2*[{ypbind}]
-$ pstree|cat|cat> |grep do  ssh  >1 f1
-$ cat f1  < f1
-     |-sshd-+-sshd---sshd---bash---script---script---bash---rshell---script---script---bash---script---script---bash
-     |      |-14*[sshd---sshd---bash---script---script---bash---vim]
-     |      |-3*[sshd---sshd---bash]
-     |      |-14*[sshd---sshd---bash---script---script---bash]
-     |      |-4*[sshd---sshd---sftp-server]
-     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---rshell---rshell
+$ cat< #If no file is entered
+open: : No such file or directory
+$ cat>    ls>                      >          #Test             #Testing the same thing
+open: : No such file or directory
+$ c cat<>    <   >  #Multiple missing ios
+open: : No such file or directory
+$ ls|cat #Piping
+bin
+f1
+f2
+f3
+f4
+LICENSE
+makefile
+README.md
+src
+test
+$ ls -al | cat | sed s/May/Apr   Sept/g #Multiple pipes and flags
+total 56
+drwx------  6 donei003 csmajs  4096 Sept 17 23:18 .
+drwx------ 56 donei003 csmajs 16384 Sept 17 19:30 ..
+drwx------  2 donei003 csmajs  4096 Sept 17 23:16 bin
+-rw-------  1 donei003 csmajs  1573 Sept 17 23:20 f1
+-rw-------  1 donei003 csmajs     0 Sept 17 23:21 f2
+-rw-------  1 donei003 csmajs     0 Sept 17 23:21 f3
+-rw-------  1 donei003 csmajs  1573 Sept 17 23:21 f4
+drwx------  8 donei003 csmajs  4096 Sept 17 22:47 .git
+-rw-------  1 donei003 csmajs  1063 Sept  6 15:46 LICENSE
+-rw-------  1 donei003 csmajs   483 Sept  6 17:04 makefile
+-rw-------  1 donei003 csmajs  3301 Sept 17 18:58 README.md
+drwx------  2 donei003 csmajs  4096 Sept 17 19:30 src
+drwx------  2 donei003 csmajs  4096 Sept 17 23:16 test
+$ ls  ps > f1 | cat #Which has higher precedence
+  PID TTY          TIME CMD
+21742 pts/42   00:00:00 bash
+21907 pts/42   00:00:00 rshell
+25586 pts/42   00:00:00 ps
+25587 pts/42   00:00:00 cat
+$ cat < f1
+$ #Piping has highe  r precedence
+$ cat<f1           |                sed   s/pts/Dylan/g  #Input redirection with pipe
+$ cat < f1 | cat
+$ cat < f1
+$ # Ha, f1 was empty
+$ cat f3
+$ cat f4
+init-+-auditd---{auditd}
+     |-automount---6*[{automount}]
+     |-avahi-daemon---avahi-daemon
+     |-console-kit-dae---63*[{console-kit-da}]
+     |-crond
+     |-cupsd
+     |-dbus-daemon
+     |-devkit-power-da
+     |-dhclient
+     |-irqbalance
+     |-master-+-pickup
+     |        `-qmgr
+     |-6*[mingetty]
+     |-polkitd
+     |-portreserve
+     |-rpc.statd
+     |-rpcbind
+     |-rsyslogd---4*[{rsyslogd}]
+     |-sshd-+-6*[sshd---sshd---bash---script---script---bash---vim]
+     |      |-12*[sshd---sshd---bash---script---script---bash]
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---rshell
      |      |-sshd---sshd---bash---script---script---bash---rshell
-     |      |-sshd---sshd---bash---script---script---bash---a.out
-     |      |-sshd---sshd---bash---script---script---bash---make---gdb-+-make---gdb---rshell
-     |      |-sshd---sshd---bash---script---script---bash---man---sh---sh---less
-     |      |-sshd---sshd---bash---script---script---bash---gdb---a.out
-     |      `-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---rshell-+-2*[cat]
-$ ls > f1
-$ ps > f2
-$ cat < f1 | cat < f2 | cat #Showing which has hg            how   which cat gets higher priority
+     |      |-3*[sshd---sshd---sftp-server]
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---rshell
+     |      |-sshd---sshd---bash---vim
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---script---script---bash
+     |      |-2*[sshd---sshd---bash]
+     |      |-sshd---sshd---bash---a.out
+     |      |-sshd---sshd---bash---script---script---bash---make---g++---cc1plus
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---script---script---bas+
+     |      `-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---rshell---pstree
+     |-udevd
+     `-ypbind---2*[{ypbind}]
+$ cat < f4 | grep ssd h
+     |-sshd-+-6*[sshd---sshd---bash---script---script---bash---vim]
+     |      |-12*[sshd---sshd---bash---script---script---bash]
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---rshell
+     |      |-sshd---sshd---bash---script---script---bash---rshell
+     |      |-3*[sshd---sshd---sftp-server]
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---rshell
+     |      |-sshd---sshd---bash---vim
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---script---script---bash
+     |      |-2*[sshd---sshd---bash]
+     |      |-sshd---sshd---bash---a.out
+     |      |-sshd---sshd---bash---script---script---bash---make---g++---cc1plus
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash
+     |      |-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---script---script---bas+
+     |      `-sshd---sshd---bash---script---script---bash---script---script---bash---script---script---bash---rshell---pstree
+$ cat|cat|cat|cat
+ssfsdf
+ssfsdf
+^C
+[s%%%%%%%%%%[u[0;32mdonei003[0;36m@[0;32mcs100[0;36m:[0;32m~/rshell[0;95m (hw2) [0;36m$[0m cd rshell;make;clear;bin/rshell[Kbin/resh[K[K[Ksg[Khell
+$ ls|cat|cat|cat
 bin
 f1
 f2
 f3
+f4
 LICENSE
 makefile
 README.md
 src
 test
-$ ls >>       ps >> f1 | cat | grep f
-$ cat f1
-bin
-f1
-f2
-f3
-LICENSE
-makefile
-README.md
-src
-test
-$ grep    ps -ef | grep donei003 | grep ssh | cat | cat > f1
-$ cat f1
+$ ls|
+$ cat| # Nothing happens
+$ ps -ef | grep donei003 # Showing no zombies  processes
 root      4714  2462  0 18:35 ?        00:00:00 sshd: donei003 [priv]
 donei003  4730  4714  0 18:35 ?        00:00:00 sshd: donei003@pts/59
+donei003  4731  4730  0 18:35 pts/59   00:00:00 -bash
 donei003  4766  4731  0 18:35 pts/59   00:00:00 script -q -c env PS1='\[\e[s%%%%%%%%%%\e[u\]\[\e[0;32m\]\u\[\e[0;36m\]@\[\e[0;32m\]cs100\[\e[0;36m\]:\[\e[0;32m\]\w\[\e[0;95m\]$(__git_ps1) \[\e[0;36m\]$\[\e[0m\] ' bash --norc -i /usr/csshare/cs100/log/gdb/shell-donei003-2015-05-17-18-35-22.StHezRerz
 donei003  4779  4766  0 18:35 pts/59   00:00:00 script -q -c env PS1='\[\e[s%%%%%%%%%%\e[u\]\[\e[0;32m\]\u\[\e[0;36m\]@\[\e[0;32m\]cs100\[\e[0;36m\]:\[\e[0;32m\]\w\[\e[0;95m\]$(__git_ps1) \[\e[0;36m\]$\[\e[0m\] ' bash --norc -i /usr/csshare/cs100/log/gdb/shell-donei003-2015-05-17-18-35-22.StHezRerz
-donei003 16450 16435  0 19:14 pts/18   00:00:00 script -q -c env PS1='\[\e[s%%%%%%%%%%\e[u\]\[\e[0;32m\]\u\[\e[0;36m\]@\[\e[0;32m\]cs100\[\e[0;36m\]:\[\e[0;32m\]\w\[\e[0;95m\]$(__git_ps1) \[\e[0;36m\]$\[\e[0m\] ' bash --norc -i /usr/csshare/cs100/log/gdb/shell-donei003-2015-05-17-19-14-33.DWt8eJUPK
-donei003 16463 16450  0 19:14 pts/18   00:00:00 script -q -c env PS1='\[\e[s%%%%%%%%%%\e[u\]\[\e[0;32m\]\u\[\e[0;36m\]@\[\e[0;32m\]cs100\[\e[0;36m\]:\[\e[0;32m\]\w\[\e[0;95m\]$(__git_ps1) \[\e[0;36m\]$\[\e[0m\] ' bash --norc -i /usr/csshare/cs100/log/gdb/shell-donei003-2015-05-17-19-14-33.DWt8eJUPK
-donei003 18226 16543  0 19:26 pts/27   00:00:00 grep ssh
+donei003  4780  4779  0 18:35 pts/67   00:00:00 bash --norc -i
+donei003 21719 45871  0 23:22 pts/7    00:00:00 script test/piping.script
+donei003 21721 21719  0 23:22 pts/7    00:00:00 script test/piping.script
+donei003 21722 21721  0 23:22 pts/39   00:00:00 bash -i
+donei003 21728 21722  0 23:22 pts/39   00:00:00 script -q -c env PS1='\[\e[s%%%%%%%%%%\e[u\]\[\e[0;32m\]\u\[\e[0;36m\]@\[\e[0;32m\]cs100\[\e[0;36m\]:\[\e[0;32m\]\w\[\e[0;95m\]$(__git_ps1) \[\e[0;36m\]$\[\e[0m\] ' bash --norc -i /usr/csshare/cs100/log/gdb/shell-donei003-2015-05-17-23-22-56.mkGia0UH8
+donei003 21741 21728  0 23:22 pts/39   00:00:00 script -q -c env PS1='\[\e[s%%%%%%%%%%\e[u\]\[\e[0;32m\]\u\[\e[0;36m\]@\[\e[0;32m\]cs100\[\e[0;36m\]:\[\e[0;32m\]\w\[\e[0;95m\]$(__git_ps1) \[\e[0;36m\]$\[\e[0m\] ' bash --norc -i /usr/csshare/cs100/log/gdb/shell-donei003-2015-05-17-23-22-56.mkGia0UH8
+donei003 21742 21741  0 23:22 pts/42   00:00:00 bash --norc -i
+donei003 28616 21742  0 23:35 pts/42   00:00:00 bin/rshell
+donei003 28726 28616  0 23:36 pts/42   00:00:00 cat
+donei003 28876 28616  6 23:37 pts/42   00:00:00 ps -ef
+donei003 28877 28616  0 23:37 pts/42   00:00:00 grep donei003
 root     45803  2462  0 18:10 ?        00:00:00 sshd: donei003 [priv]
 donei003 45822 45803  0 18:10 ?        00:00:00 sshd: donei003@pts/6
+donei003 45823 45822  0 18:10 pts/6    00:00:00 -bash
 donei003 45857 45823  0 18:10 pts/6    00:00:00 script -q -c env PS1='\[\e[s%%%%%%%%%%\e[u\]\[\e[0;32m\]\u\[\e[0;36m\]@\[\e[0;32m\]cs100\[\e[0;36m\]:\[\e[0;32m\]\w\[\e[0;95m\]$(__git_ps1) \[\e[0;36m\]$\[\e[0m\] ' bash --norc -i /usr/csshare/cs100/log/gdb/shell-donei003-2015-05-17-18-10-25.9gE2V3RPl
 donei003 45870 45857  0 18:10 pts/6    00:00:00 script -q -c env PS1='\[\e[s%%%%%%%%%%\e[u\]\[\e[0;32m\]\u\[\e[0;36m\]@\[\e[0;32m\]cs100\[\e[0;36m\]:\[\e[0;32m\]\w\[\e[0;95m\]$(__git_ps1) \[\e[0;36m\]$\[\e[0m\] ' bash --norc -i /usr/csshare/cs100/log/gdb/shell-donei003-2015-05-17-18-10-25.9gE2V3RPl
-$ ls    #Test cases
-$ ls |
-$ cat <
-$ open: : No such file or directory
-ls
-$ bin  f1  f2  f3  LICENSE  makefile  README.md  src  test
-cat < f4
-$ open: : No such file or directory
-ls | cat |  
-$ ls -al | sed s/May/June/g
-total 60
-drwx------  6 donei003 csmajs  4096 June 17 19:07 .
-drwx------ 56 donei003 csmajs 16384 June 17 18:58 ..
-drwx------  2 donei003 csmajs  4096 June 17 19:08 bin
--rw-------  1 donei003 csmajs  2136 June 17 19:19 f1
--rw-------  1 donei003 csmajs   115 June 17 19:16 f2
--rw-------  1 donei003 csmajs   115 June 17 19:11 f3
-drwx------  8 donei003 csmajs  4096 June 17 19:07 .git
--rw-------  1 donei003 csmajs  1063 June  6 15:46 LICENSE
--rw-------  1 donei003 csmajs   483 June  6 17:04 makefile
--rw-------  1 donei003 csmajs  3301 June 17 18:58 README.md
-drwx------  2 donei003 csmajs  4096 June 17 18:40 src
-drwx------  2 donei003 csmajs  4096 June 17 19:08 test
-$ #all done
+donei003 45871 45870  0 18:10 pts/7    00:00:00 bash --norc -i
+$ rm f4
+$ ls
+bin  f1  f2  f3  LICENSE  makefile  README.md  src  test
+$ ls > f4
+$ ls
+bin  f1  f2  f3  f4  LICENSE  makefile	README.md  src	test
+$ cat < f4 | cat | cat > c f3
+$ cat f3
+bin
+f1
+f2
+f3
+f4
+LICENSE
+makefile
+README.md
+src
+test
+$ cat||||
+^C
+[s%%%%%%%%%%[u[0;32mdonei003[0;36m@[0;32mcs100[0;36m:[0;32m~/rshell[0;95m (hw2) [0;36m$[0m bin/rshell
+$ ls>>>>>>>>> #Too many brackets
+open: : No such file or directory
+$ ca  s ls | cat > f2 | cat # # see was has high priority
+bin
+f1
+f2
+f3
+f4
+LICENSE
+makefile
+README.md
+src
+test
+$ cat < f2
+$ # Pipimg        cat < f1 < f2
+$ cat <f3<f2<f4
+bin
+f1
+f2
+f3
+f4
+LICENSE
+makefile
+README.md
+src
+test
+$ cat < f3
+bin
+f1
+f2
+f3
+f4
+LICENSE
+makefile
+README.md
+src
+test
+$ cat < f4
+bin
+f1
+f2
+f3
+f4
+LICENSE
+makefile
+README.md
+src
+test
+$ pd s > f4 ;ls > f3
+$ cat   ls >> f4 >> f3 #Multiple appending
+$ cat < f4
+  PID TTY          TIME CMD
+21742 pts/42   00:00:00 bash
+29837 pts/42   00:00:00 rshell
+30660 pts/42   00:00:00 ps
+$ cat < f3
+bin
+f1
+f2
+f3
+f4
+LICENSE
+makefile
+README.md
+src
+test
+bin
+f1
+f2
+f3
+f4
+LICENSE
+makefile
+README.md
+src
+test
 $ exit
 Good-bye!
 [s%%%%%%%%%%[u[0;32mdonei003[0;36m@[0;32mcs100[0;36m:[0;32m~/rshell[0;95m (hw2) [0;36m$[0m exit
@@ -222,4 +341,4 @@ exit
 donei003@hammer $ exit
 exit
 
-Script done on Sun 17 May 2015 07:32:17 PM PDT
+Script done on Sun 17 May 2015 11:48:08 PM PDT
