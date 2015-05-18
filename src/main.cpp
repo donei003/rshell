@@ -161,8 +161,9 @@ int main() {
 
             arr[arrPos] = comm;
             ++arrPos;
-            while(pos < strSize && !(term) && !(logOR) && !(logAND)) { // Looking for our arguments
+            while(pos < strSize && !(term) && !(logOR) && !(logAND) && !(bPipe)) { // Looking for our arguments
                if(str.at(pos) == '#') { // This is the same process as for the command
+                   comment = true;
                    break;
                }
                else if(str.at(pos) == ' ' && oRedir) {
@@ -261,11 +262,16 @@ int main() {
             vector <string> infilesS;
             vector <string> outfiles; // For the > operator
             vector <string> outfilesApp; // For the >> operator
-            while((oRedir || oRedir2 || iRedir || iRedir3) && pos < strSize) {
+            while((oRedir || oRedir2 || iRedir || iRedir3) && !(comment) && pos < strSize) {
                 string file;
                 if(str.at(pos) == ' ') {
                     ++pos; 
                     continue;
+                }
+                else if(str.at(pos) == '#') {
+                    comment = true;
+                    ++pos;
+                    break;
                 }
                 else if(str.at(pos) == ';') {
                     ++pos;
@@ -281,7 +287,12 @@ int main() {
                         pos += 2;
                         pos = skipWhiteSpace(pos,strSize,str); 
                         while(pos < strSize) {
-                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|') {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|'
+                                || str.at(pos) == '<' || str.at(pos) == '>') {
+                                break;
+                            }
+                            else if(str.at(pos) == '#') {
+                                comment = true;
                                 break;
                             }
                             else {
@@ -296,7 +307,12 @@ int main() {
                         ++pos;
                         pos = skipWhiteSpace(pos,strSize,str);
                         while(pos < strSize) {
-                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|') {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|' || str.at(pos) == '<'
+                                || str.at(pos) == '>') {
+                                break;
+                            }
+                            else if(str.at(pos) == '#') {
+                                comment = true;
                                 break;
                             }
                             else {
@@ -330,7 +346,12 @@ int main() {
                         ++pos;
                         pos = skipWhiteSpace(pos,strSize,str);
                         while(pos < strSize) {
-                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|') {
+                            if(str.at(pos) == ';' || str.at(pos) == ' ' || str.at(pos) == '|'
+                                || str.at(pos) == '<' || str.at(pos) == '>') {
+                                break;
+                            }
+                            else if(str.at(pos) == '#') {
+                                comment = true;
                                 break;
                             }
                             else {

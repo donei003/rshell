@@ -41,6 +41,8 @@ Neglects whitespace characters in between commands, connectors, and arguments
 
 - Up arrow key does not run the previous command
 
+- I/O redirection must come after the arguments
+
 - Regular expressions are not supported, ```echo "hello world"``` will include the quotation marks
 
 - Rshell does not accept commands after the first instance of ```#``` in that instruction
