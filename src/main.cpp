@@ -540,6 +540,9 @@ int main() {
             //lastSuccess = success;
             free(comm); // Freeing up our char pointers for the next instruction
             free(arg);
+            if(comment) {
+                break;
+            }
         }
         if(bexit) {
             

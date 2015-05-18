@@ -33,7 +33,7 @@ Neglects whitespace characters in between commands, connectors, and arguments
 
 ##Bugs and Limitations
 
-- Commands like ```cd``` are not supported currently
+- Commands like ```cd```, and ```history``` are not supported currently
 
 - Colors for files, directories, etc. are not supported in this make of Rshell
 
