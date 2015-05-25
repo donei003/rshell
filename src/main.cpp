@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <vector>
 #include <list>
-
+#include <stdlib.h>
 /* 
  * The loop to find commands : line 88
  * The loop to find arguments : line 165
@@ -48,7 +48,7 @@ int main() {
     char *comm;
     while(1) {
         cout.flush();
-        cout << "$ ";
+        cout << getenv("PWD")  << " $ ";
         getline(cin, str);
 
         string sarg, scomm;
@@ -70,6 +70,7 @@ int main() {
             bool logOR = false, logAND = false;
             bool bPipe = false, iRedir = false, oRedir = false, oRedir2 = false;
             bool comment = false, iRedir3 = false;
+            bool cd = false;
             arrPos = 0;
             hasArg = 0;
             term = false;
@@ -146,6 +147,9 @@ int main() {
             if(comment) { // Disregard everything following the '#' character
                 break;
             }
+            if(scomm == "cd") {
+                cd = true;
+            }
 
             strcpy(comm,scomm.c_str()); // Copies the string into a char pointer
             //++pos; // This is to ommit the whitespace character following the command
@@ -154,9 +158,9 @@ int main() {
                 while(pos < strSize && str.at(pos) == ' ') {
                     ++pos;
                 }
-                if(pos >= strSize) {
+                /*if(pos >= strSize) {
                     break;
-                }
+                }*/
             }
 
             arr[arrPos] = comm;
@@ -166,14 +170,15 @@ int main() {
                    comment = true;
                    break;
                }
-               else if(str.at(pos) == ' ' && oRedir) {
+               else if(str.at(pos) == ' ' && (oRedir || cd)) {
                    ++pos;
                    continue;
                }
-               else if(str.at(pos) == '-' && str.at(pos+1) == ' ') {
+               else if(str.at(pos) == '-' && pos+1 < strSize &&  str.at(pos+1) == ' ') {
+                   cout << pos << " " << strSize << endl;
                    sarg += str.at(pos);
                    ++pos;
-                   while(str.at(pos) == ' ') {
+                   while(pos < strSize && str.at(pos) == ' ') {
                        ++pos;
                    }
                }
@@ -228,8 +233,9 @@ int main() {
                    hasArg = true;
                }
             }
-
-            if(hasArg) {
+            //cout << sarg << " " << sarg.size() << endl;
+            
+            if(hasArg && !(cd)) {
                 unsigned int n = 0;
                 string s;
                 while(n < sarg.size()) { // Seperating each command to be into their own char pointer
@@ -387,8 +393,9 @@ int main() {
                 
             }*/
 
+            //cout << getenv("PWD") << " " << getenv("OLDPWD") << endl;
             int x = 0;
-            if(scomm != "exit") {
+            if(scomm != "exit" && !(cd)) {
                 if((pid = fork()) == -1) {// Creating child process
                     perror("fork: ");
                 }
@@ -514,6 +521,36 @@ int main() {
                         else {
                             success = true;
                         }
+                    }
+                }
+            }
+            else if(cd) {
+                if(sarg == "-") {
+                    if(chdir(getenv("OLDPWD")) == -1) {
+                        perror("chdir: ");
+                    }
+                    string pwd = getenv("PWD");
+                    setenv("PWD",getenv("OLDPWD"),1);
+                    setenv("OLDPWD",pwd.c_str(),1);
+                    //cout << getenv("PWD") << " " << getenv("OLDPWD") << endl;
+                }
+                else if(sarg.size() == 0 || (sarg.size() != 0 && sarg.at(0) == ' ')) {
+                    //cout << getenv("PWD") << " " << getenv("OLDPWD") << endl;
+                    string home = getenv("HOME");
+                    string currPwd = getenv("PWD");
+                    if(home != currPwd) {
+                        if(chdir(getenv("HOME")) == -1) {
+                            perror("chdir: ");
+                        }
+                        string pwd = getenv("PWD");
+                        setenv("PWD",getenv("HOME"),1);
+                        setenv("OLDPWD",pwd.c_str(),1);
+                    }
+                }
+                else {
+                    cout << "Here" << endl;
+                    if(chdir(getenv("HOME")) == -1) {
+                        perror("chdir: ");
                     }
                 }
             }
