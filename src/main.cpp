@@ -529,9 +529,11 @@ int main() {
                     if(chdir(getenv("OLDPWD")) == -1) {
                         perror("chdir: ");
                     }
-                    string pwd = getenv("PWD");
-                    setenv("PWD",getenv("OLDPWD"),1);
-                    setenv("OLDPWD",pwd.c_str(),1);
+                    else {
+                        string pwd = getenv("PWD");
+                        setenv("PWD",getenv("OLDPWD"),1);
+                        setenv("OLDPWD",pwd.c_str(),1);
+                    }
                     //cout << getenv("PWD") << " " << getenv("OLDPWD") << endl;
                 }
                 else if(sarg.size() == 0 || (sarg.size() != 0 && sarg.at(0) == ' ')) {
@@ -542,10 +544,23 @@ int main() {
                         if(chdir(getenv("HOME")) == -1) {
                             perror("chdir: ");
                         }
-                        string pwd = getenv("PWD");
-                        setenv("PWD",getenv("HOME"),1);
-                        setenv("OLDPWD",pwd.c_str(),1);
+                        else {
+                            string pwd = getenv("PWD");
+                            setenv("PWD",getenv("HOME"),1);
+                            setenv("OLDPWD",pwd.c_str(),1);
+                        }
                     }
+                }
+                else if(sarg.at(0) == '/') {
+                    if(chdir(sarg.c_str()) == -1) {
+                        perror("chdir: ");
+                    }
+                    else {
+                        setenv("OLDPWD",getenv("PWD"),1);
+                        setenv("PWD",sarg.c_str(),1);
+                    }
+                    cout << getenv("PWD") << " " << getenv("OLDPWD") << endl;
+
                 }
                 else {
                     cout << "Here" << endl;
