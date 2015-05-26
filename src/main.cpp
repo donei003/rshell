@@ -48,7 +48,18 @@ int main() {
     char *comm;
     while(1) {
         cout.flush();
-        cout << getenv("PWD")  << " $ ";
+        string printPwd = getenv("PWD");
+        string home = getenv("HOME");
+        int homeSize = home.size();
+        if(printPwd.at(printPwd.size()-1) == '/') {
+            printPwd.at(printPwd.size()-1) = '\0';
+        }
+        if(printPwd.find(home) != string::npos) {
+            string tempPwd = "~";
+            tempPwd += printPwd.substr(homeSize, printPwd.size()-homeSize);
+            printPwd = tempPwd;
+        }
+        cout << printPwd  << " $ ";
         getline(cin, str);
 
         string sarg, scomm;
@@ -563,9 +574,20 @@ int main() {
 
                 }
                 else {
-                    cout << "Here" << endl;
+                    string currPwd = getenv("PWD");
+                    if(currPwd.at(currPwd.size()-1) == '/') {
+                        currPwd += sarg;
+                    }
+                    else {
+                        currPwd += "/";
+                        currPwd += sarg;
+                    }
                     if(chdir(getenv("HOME")) == -1) {
                         perror("chdir: ");
+                    }
+                    else {
+                        setenv("OLDPWD", getenv("PWD"),1);
+                        setenv("PWD",currPwd.c_str(),1);
                     }
                 }
             }
