@@ -29,13 +29,15 @@ Supports the use of comments in the terminal
 
 Supports changing the working directory of the current process with the ```cd``` command
 
+Interrupts system call with ```^C```
+
 To exit type in ```exit```
 
 Neglects whitespace characters in between commands, connectors, and arguments
 
 ##Bugs and Limitations
 
-- Commands like ```cd```, and ```history``` are not supported currently
+- Commands like ```history``` are not supported currently
 
 - Colors for files, directories, etc. are not supported in this make of Rshell
 
@@ -44,6 +46,11 @@ Neglects whitespace characters in between commands, connectors, and arguments
 - Up arrow key does not run the previous command
 
 - I/O redirection must come after the arguments
+
+- Executing ```cd``` without arguments multiple times will not keep updating the PWD and OLDPWD
+  so that ```cd -``` can always take you back
+
+- Control-c does not work with pipes
 
 - Regular expressions are not supported, ```echo "hello world"``` will include the quotation marks
 
