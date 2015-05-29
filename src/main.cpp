@@ -41,7 +41,9 @@ void handler(int signal) {
         controlC = true;
         //cout << " Control-C " << foreground_pid << endl;
         if(foreground_pid > 0) {
-            kill(foreground_pid, SIGINT);
+            //if(kill(foreground_pid, SIGINT) == -1) {
+            //  perror("kill in handler");
+            //}
         }
         //controlC = false;
         /*if(wait(0) == -1) {
