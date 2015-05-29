@@ -67,6 +67,7 @@ int main() {
     char *arg;
     char *comm;
     while(1) {
+        cin.clear();
         if(sigaction(SIGINT, &sa, NULL) == -1) {
             perror("sigaction: ");
         }
@@ -82,8 +83,10 @@ int main() {
             tempPwd += printPwd.substr(homeSize, printPwd.size()-homeSize);
             printPwd = tempPwd;
         }
+        if(controlC) {
+            cout << endl;
+        }
         cout << printPwd  << " $ ";
-        cin.clear();
         getline(cin, str);
 
 
@@ -516,7 +519,7 @@ int main() {
                  // close fd[1] and 0 dup fd[0]
                 else { // Parent process
                     foreground_pid = pid;
-                    cout << foreground_pid << endl;
+                    //cout << foreground_pid << endl;
 
                     if(lastPipe) {
                         if(close(fd0) == -1) {
@@ -543,9 +546,17 @@ int main() {
                         else {
                             //cout << "hello" << endl;
                             if(!(controlC)) {
-                                if(wait(0) == -1) {
-                                    perror("wait: ");
+                                int wpid;
+                                do {
+                                    wpid = wait(0);
                                 }
+                                while(wpid == -1 && errno == EINTR);
+                                if(wpid == -1) {
+                                    perror("wait in parent ");
+                                }
+                            }
+                            else {
+                                continue;
                             }
                         }
                     }
