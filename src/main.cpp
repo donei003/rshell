@@ -13,6 +13,7 @@
 #include <vector>
 #include <list>
 #include <stdlib.h>
+#include <signal.h>
 /* 
  * The loop to find commands : line 88
  * The loop to find arguments : line 165
@@ -25,6 +26,8 @@
 
 
 using namespace std;
+int foreground_pid;
+bool controlC = false;
 
 int skipWhiteSpace(int pos, int strSize,string str) {
     while(pos < strSize && str.at(pos) == ' ') {
@@ -32,6 +35,21 @@ int skipWhiteSpace(int pos, int strSize,string str) {
     }
     return pos;
 }
+
+void handler(int signal) {
+    if(signal == SIGINT) {
+        controlC = true;
+        //cout << " Control-C " << foreground_pid << endl;
+        if(foreground_pid > 0) {
+            kill(foreground_pid, SIGINT);
+        }
+        //controlC = false;
+        /*if(wait(0) == -1) {
+            perror("wait: ");
+        }*/
+    }
+}
+
 
 bool isDependant = 0;
 int main() {
@@ -43,10 +61,15 @@ int main() {
     bool bexit = false;
     int fd[2];
     list<int> childPipePIDs;
+    struct sigaction sa;
+    sa.sa_handler = handler;
 
     char *arg;
     char *comm;
     while(1) {
+        if(sigaction(SIGINT, &sa, NULL) == -1) {
+            perror("sigaction: ");
+        }
         cout.flush();
         string printPwd = getenv("PWD");
         string home = getenv("HOME");
@@ -60,7 +83,9 @@ int main() {
             printPwd = tempPwd;
         }
         cout << printPwd  << " $ ";
+        cin.clear();
         getline(cin, str);
+
 
         string sarg, scomm;
         bool success = false;
@@ -77,6 +102,7 @@ int main() {
             char* arr[30]; 
             string sarg, scomm;
             int fd0, fd1;
+            controlC = false;
 
             bool logOR = false, logAND = false;
             bool bPipe = false, iRedir = false, oRedir = false, oRedir2 = false;
@@ -489,6 +515,9 @@ int main() {
                  // close fd[0] and 1 dup fd[1]
                  // close fd[1] and 0 dup fd[0]
                 else { // Parent process
+                    foreground_pid = pid;
+                    cout << foreground_pid << endl;
+
                     if(lastPipe) {
                         if(close(fd0) == -1) {
                             perror("close: ");
@@ -512,8 +541,11 @@ int main() {
                             }
                         }
                         else {
-                            if(wait(0) == -1) {
-                                perror("wait: ");
+                            //cout << "hello" << endl;
+                            if(!(controlC)) {
+                                if(wait(0) == -1) {
+                                    perror("wait: ");
+                                }
                             }
                         }
                     }
