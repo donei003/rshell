@@ -615,7 +615,7 @@ int main() {
                         setenv("OLDPWD",getenv("PWD"),1);
                         setenv("PWD",sarg.c_str(),1);
                     }
-                    cout << getenv("PWD") << " " << getenv("OLDPWD") << endl;
+                    //cout << getenv("PWD") << " " << getenv("OLDPWD") << endl;
 
                 }
                 else {
@@ -627,7 +627,7 @@ int main() {
                         currPwd += "/";
                         currPwd += sarg;
                     }
-                    if(chdir(getenv("HOME")) == -1) {
+                    if(chdir(currPwd.c_str()) == -1) {
                         perror("chdir: ");
                     }
                     else {

@@ -27,7 +27,9 @@ Supports the chaining of multiple commands, pipes, and input/output redirections
 
 Supports the use of comments in the terminal
 
-Supports the exit command
+Supports changing the working directory of the current process with the ```cd``` command
+
+To exit type in ```exit```
 
 Neglects whitespace characters in between commands, connectors, and arguments
 
