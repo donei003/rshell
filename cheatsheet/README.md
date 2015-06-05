@@ -7,6 +7,7 @@ GDB Cheatsheet is a cheatsheet designed for UCR's CS100 class to help students u
 <h4>List of Commands</h4>
 
 | command | what it does |
+| --- | --- |
 | break | Suspends program at line number or function |
 | tbreak | Creates a temporary breakpoint |
 | info | Lists information about it's argument |
@@ -37,3 +38,5 @@ GDB Cheatsheet is a cheatsheet designed for UCR's CS100 class to help students u
 | signal | Sends signal to program |
 | kill | Kills program without exiting gdb |
 | quit | Exits gdb
+
+###List of Flags
