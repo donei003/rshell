@@ -81,11 +81,22 @@ Otherwise, the program would just run.
 This lets you step through the program after the break, and shows when and where any errors or outputs occur. 
 
 ```
+   (gdb) tbreak
+```
+
+'tbreak' can be shortened to `tb`.
+This commands acts like `breakpoint` and can take the same arguments such as a line number and a function name.
+The difference between the two is `tbreak` creates a temporary breakpoint.
+The breakpoint will only "break" once and then it is removed. 
+This can be useful if you only want to stop once and not every time, for instance when breaking inside of a function.
+
+```
   info breakpoint
 ```
 
 `info breakpoint` will print out the number of breakpoints, the type, the location, and any conditions associated with the breakpoint.
 It will also tell you however many times you've hit the breakpoint.
+Additionally, temporary breakpoints will be displayed, as long as the program has not hit them yet and they have not been removed.
 It will also print out any watchpoints.
 
 ```
@@ -233,7 +244,17 @@ Similarly to step, next has an optional argument that will go through the code h
 For example, `(gdb) next 5` will step through 5 lines of code, however it will still not go into function calls.  
 
 ```
-  (gdb)finish
+  (gdb) until
+  or
+  (gdb) u
+```
+
+`until` takes in the same arguments as breakpoint.
+This commands acts very similarly to `tbreak`; the program will run until a specified line number or function name.
+The difference is that no breakpoints will be created and the program doesn't "break".
+
+```
+  (gdb) finish
 ```
 
 `finish` is used inside functions.
@@ -289,7 +310,7 @@ For example, `(gdb) print <variable> = 50` will change variable to 50.
 (gdb) backtrace full
 ```
 
-`Backtrace full` is a useful command that will print out all local variables and their values.
+`backtrace full` is a useful command that will print out all local variables and their values.
 Additionally, the command tells the user which function they are currently in.
 As with the `print` command, the scope is within the function that the program is currently in.
 In small programs, the `print` command may be used, but if there are many variables, `backtrace full` is much more useful.
@@ -300,7 +321,7 @@ When `backtrace full` is ran after line 14 in the above program, the output is a
     yay = {taco = 7, beef = "ground", chcicken = "shredded"}
 ```
 
-If the user wants to keep track of a single variable, the `display` command can be used instead.
+If the user wants to keep track of individual variables, the `display` command can be used instead.
 
 ```
   (gdb) display <variable name>
@@ -325,6 +346,12 @@ Display is useful for finding scoping errors, so if you display a variable and i
 ```
 
 `whatis` will tell you what type the variable is. 
+
+```
+   (gdb) where
+```
+
+`where` displays the current line number along with the function you are currently in.
 
 ```
   (gdb) set var <variable name>=<value>
