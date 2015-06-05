@@ -55,6 +55,17 @@ It omits the many lines of text explaining legal issues.
 This flag can be placed anywhere except after the `--args` flag. 
 
 ```
+  $ gdb --command=command-file
+  or
+  $ gdb -x command-file
+```
+
+If you already know what commands you want to execute, you can store them in a file and pass it in with the `-x` flag.
+This will effectively automate the gdb process.
+This can be very useful when debugging and can save a lot of time.
+Another useful case is using this file to setup gdb such as creating breakpoints.
+
+```
   $ gdb <program> -tui
 ```
 
@@ -299,12 +310,17 @@ $1 = {taco = 7, beef = "ground", chicken = "shredded"}
 ```
 
 This is extremely useful in tracking your variables.
+`print` can also be used to find segfaults in your code.
+If gdb tells the user it cannot access the memory of the variable, it is likely due to a segfault.
 With gdb you don't have to output your variables in your source code.
 Instead, you can just print it here.
 Be wary though, for the scope of the variable is very important.
 This can only print out variables in the same scope, so if you're in your main function, and you're trying to print out a variable in another function, and you're going to have a bad time.
 Print can also change a variable.
 For example, `(gdb) print <variable> = 50` will change variable to 50.
+You can also call your own functions inside gdb with `print`.
+For example, `p foo(7,"ground","shredded")` will call you function.
+If you pass a variable into it and the function changes the value, after exiting the value will be the new value.
 
 ```
 (gdb) backtrace full
@@ -360,6 +376,13 @@ Display is useful for finding scoping errors, so if you display a variable and i
 `set var` allows you to change a variable. 
 
 ```
+  (gdb) set follow-fork-mode child
+```
+
+Gdb will follow the child process after the fork occurs.
+Additionally, the parent process can be followed instead.
+
+```
   (gdb) record
   or 
   (gdb) rec 
@@ -390,6 +413,14 @@ It undoes everything the program did, including reverting all variable changes.
 
 `Reverse-continue` rewinds your program until it hits a breakpoint or until it's at the beginning of the program.
 It functions exactly the same as normal continue, except it goes backwards!
+
+```
+  (gdb) signal
+```
+
+With the `signal` command, gdb can send signals such as SIGINT and SIGSTOP to the program.
+This can be very useful when testing a signal handler.
+This will prove to be useful on homework 3.
 
 ```
   (gdb) kill
