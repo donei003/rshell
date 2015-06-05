@@ -61,9 +61,9 @@ This flag can be placed anywhere except after the `--args` flag.
 ```
 
 If you already know what commands you want to execute, you can store them in a file and pass it in with the `-x` flag.
-This will effectively automate the gdb process.
-This can be very useful when debugging and can save a lot of time.
-Another useful case is using this file to setup gdb such as creating breakpoints.
+The command-file acts like a gdb script.
+This will effectively automate the gdb process and can be a useful tool when debugging and can save a lot of time.
+For instance, useful case is using this file to setup gdb such as creating breakpoints.
 
 ```
   $ gdb <program> -tui
@@ -176,17 +176,6 @@ Any runs before the program finishes prompts a restart, which keeps all breakpoi
 Any runs after the program finishes will still keep its breakpoints or commands as well.
 
 ###Using GDB
-
-```
-  (gdb) set logging on
-  or
-  (gdb) set logging off
-```
-
-Once logging is turned on, it will record everything from that point to when the user turns it off or exits gdb.
-Storing the gdb session can be useful for debugging and saving time.
-Gdb will store the current session into `gdb.txt` by default.
-The user can change this with `set logging file log-file` where `log-file` is the name of the file to store the session.
 
 After using `run` and reaching a line with input or a breakpoint, there are many commands that you can use.
 
@@ -439,3 +428,64 @@ This allows you to restart the debugging process with all breakpoints intact.
 
 `quit` does what it sounds like; it quits gdb!
 
+###GDB Settings
+
+```
+  (gdb) set logging on
+  or
+  (gdb) set logging off
+```
+
+Once logging is turned on, it will record everything from that point to when the user turns it off or exits gdb.
+Storing the gdb session can be useful for debugging and saving time.
+Gdb will store the current session into `gdb.txt` by default.
+The user can change this with `set logging file log-file` where `log-file` is the name of the file to store the session.
+
+```
+  (gdb) set print array on
+  or 
+  (gdb) set print array off
+```
+
+Gdb by default displays arrays in a compact form such as
+
+```
+(gdb) p arr
+$1 = {1, 2, 3}
+```
+
+After running `set print array on gdb will now print the array with each index on its own line:
+
+```
+(gdb) p arr
+$1 = {1,
+2, 
+3}
+```
+
+The advantage to using this is that the contents of the array are easier to read.
+The disadvantage comes when the size of your array is large.
+
+```
+  (gdb) set print array-indexes on
+  or
+  (gdb) set print array-indexes off
+```
+
+After running `set print array-indexes on`, gdb will now print the index of the array alongside the contents of each index.
+Without being turned on, printing an array will look like:
+
+```
+(gdb) p arr
+$1 = {1, 2, 3}
+```
+
+After turning on print array-indexes, the output will become:
+
+```
+(gdb) p arr
+$1 = {[0] = 1, [1] = 2, [2] = 3}
+```
+
+This allows the user to keep track of an array without having to count out which value corresponding to which index of the array.
+This can be extremely useful when the size of the array is above a size of 10 and can speed up debugging time.
