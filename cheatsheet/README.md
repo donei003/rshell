@@ -36,4 +36,4 @@ GDB Cheatsheet is a cheatsheet designed for UCR's CS100 class to help students u
 | reverse-continue | Continues backwards |
 | signal | Sends signal to program |
 | kill | Kills program without exiting gdb |
-| quit | Exits gdb |
+| quit | Exits gdb
