@@ -55,9 +55,9 @@ It omits the many lines of text explaining legal issues.
 This flag can be placed anywhere except after the `--args` flag. 
 
 ```
-  $ gdb --command=command-file
+  $ gdb --command=command-file <program>
   or
-  $ gdb -x command-file
+  $ gdb -x command-file <program>
 ```
 
 If you already know what commands you want to execute, you can store them in a file and pass it in with the `-x` flag.
@@ -464,7 +464,7 @@ $1 = {1,
 ```
 
 The advantage to using this is that the contents of the array are easier to read.
-The disadvantage comes when the size of your array is large.
+The disadvantage comes when the size of your array is large and the output goes off of the screen.
 
 ```
   (gdb) set print array-indexes on
